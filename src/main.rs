@@ -93,10 +93,15 @@ struct ManagedBackend {
 
 impl ManagedBackend {
     fn new(port: u16) -> Result<Self> {
-        let mut child = Command::new("python")
-            .args(["gui.py", "--host", "127.0.0.1", "--port", &port.to_string()])
-            .group()
-            .spawn()?;
+        let mut command = Command::new("python");
+        command.args(["gui.py", "--host", "127.0.0.1", "--port", &port.to_string()]);
+        let mut group = command.group();
+        #[cfg(windows)]
+        {
+            use winapi::um::winbase::CREATE_NO_WINDOW;
+            group.creation_flags(CREATE_NO_WINDOW);
+        }
+        let mut child = group.spawn()?;
 
         let address = format!("127.0.0.1:{}", port).parse().unwrap();
         let start_time = std::time::Instant::now();
