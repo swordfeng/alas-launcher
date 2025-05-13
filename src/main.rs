@@ -13,11 +13,7 @@ use std::{
 
 use command_group::{CommandGroup, GroupChild};
 #[cfg(unix)]
-use nix::sys::signal::{killpg, Signal};
-#[cfg(unix)]
-use nix::unistd::{setpgid, Pid};
-#[cfg(unix)]
-use os::unix::process::CommandExt;
+use command_group::Signal;
 use tauri::{Manager, Url};
 
 use anyhow::{anyhow, Result};
