@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "alas-launcher",
+  "version": "0.1.0",
+  "identifier": "moe.taiho.alas-launcher",
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "Alas",
+        "width": 1280,
+        "height": 880
+      }
+    ]
+  }
+}

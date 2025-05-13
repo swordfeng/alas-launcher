@@ -1,0 +1,26 @@
+[package]
+name = "alas-launcher"
+version = "0.1.0"
+description = "New ALAS launcher built with Tauri"
+authors = ["Jianfeng Zhang <swordfeng123@gmail.com>"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+dirs = "6"
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+wait-timeout = "0.2.1"
+
+[target.'cfg(unix)'.dependencies]
+nix = { version = "0.30", features = ["signal"]}
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["consoleapi", "processenv"] }
