@@ -11,9 +11,9 @@ use std::{
     time::Duration,
 };
 
-use command_group::{CommandGroup, GroupChild};
 #[cfg(unix)]
 use command_group::Signal;
+use command_group::{CommandGroup, GroupChild};
 use tauri::{Manager, Url};
 
 use anyhow::{anyhow, Result};
