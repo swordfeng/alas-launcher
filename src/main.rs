@@ -100,7 +100,7 @@ impl ManagedBackend {
 
         let address = format!("127.0.0.1:{}", port).parse().unwrap();
         let start_time = std::time::Instant::now();
-        while start_time.elapsed() < Duration::from_secs(5) {
+        while start_time.elapsed() < Duration::from_secs(60) {
             if TcpStream::connect_timeout(&address, Duration::from_millis(100)).is_ok() {
                 return Ok(Self { child: Some(child) });
             }
