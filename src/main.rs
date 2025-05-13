@@ -1,20 +1,28 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{env::set_current_dir, fs, net::TcpStream, os::unix::process::CommandExt as _, path::PathBuf, process::{Child, Command}, thread::sleep, time::Duration};
+use std::{
+    env::set_current_dir,
+    fs,
+    net::TcpStream,
+    path::PathBuf,
+    process::{Command, ExitStatus},
+    thread::sleep,
+    time::Duration,
+};
 
+use command_group::{CommandGroup, GroupChild};
 #[cfg(unix)]
 use nix::sys::signal::{killpg, Signal};
 #[cfg(unix)]
-use nix::unistd::{Pid, setpgid};
+use nix::unistd::{setpgid, Pid};
+#[cfg(unix)]
+use os::unix::process::CommandExt;
 use tauri::{Manager, Url};
-#[cfg(windows)]
-use winapi::um::consoleapi::GenerateConsoleCtrlEvent;
 
-use wait_timeout::ChildExt;
 use anyhow::{anyhow, Result};
-use tracing::{info, warn};
 use serde_json::Value as JsonValue;
+use tracing::{info, warn};
 
 fn alas_repo_dir() -> Result<PathBuf> {
     let mut app_local_dir =
@@ -37,7 +45,11 @@ fn git_init() -> Result<()> {
     }
 
     let status = Command::new("git")
-        .args(["clone", "https://github.com/LmeSzinc/AzurLaneAutoScript.git", "."])
+        .args([
+            "clone",
+            "https://github.com/LmeSzinc/AzurLaneAutoScript.git",
+            ".",
+        ])
         .status()?;
 
     if !status.success() {
@@ -49,7 +61,10 @@ fn git_init() -> Result<()> {
 
 fn git_update() -> Result<()> {
     let status = Command::new("python")
-        .args(["-c", "import deploy.git; deploy.git.GitManager().git_install()"])
+        .args([
+            "-c",
+            "import deploy.git; deploy.git.GitManager().git_install()",
+        ])
         .status()?;
     if !status.success() {
         return Err(anyhow!("Failed to update repository"));
@@ -77,67 +92,52 @@ fn get_deploy_config() -> Option<JsonValue> {
 }
 
 struct ManagedBackend {
-    child: Option<Child>,
+    child: Option<GroupChild>,
 }
 
 impl ManagedBackend {
     fn new(port: u16) -> Result<Self> {
-        let mut command = Command::new("python");
-        command.args(["gui.py", "--host", "127.0.0.1", "--port", &port.to_string()]);
-
-        // Create a new process group
-        #[cfg(unix)]
-        unsafe {
-            command.pre_exec(|| {
-                setpgid(Pid::from_raw(0), Pid::from_raw(0))?; // Set the process group ID to the same as the PID
-                Ok(())
-            });
-        }
-        let mut backend = Self { child: Some(command.spawn()?) };
+        let mut child = Command::new("python")
+            .args(["gui.py", "--host", "127.0.0.1", "--port", &port.to_string()])
+            .group()
+            .spawn()?;
 
         let address = format!("127.0.0.1:{}", port).parse().unwrap();
         let start_time = std::time::Instant::now();
         while start_time.elapsed() < Duration::from_secs(5) {
             if TcpStream::connect_timeout(&address, Duration::from_millis(100)).is_ok() {
-                // Port is ready
-                return Ok(backend);
+                return Ok(Self { child: Some(child) });
             }
-            // Wait for a short duration before retrying
             sleep(Duration::from_millis(100));
         }
 
-        match backend.kill() {
+        match child.kill() {
             Ok(_) => {}
             Err(e) => warn!("Failed to kill gui.py process: {:?}", e),
         }
         Err(anyhow!("Timeout waiting for port {} to be ready", port))
     }
 
-
-    fn kill(&mut self) -> Result<()> {
+    fn kill(&mut self) -> Result<ExitStatus> {
         if let Some(mut child) = self.child.take() {
             #[cfg(unix)]
             {
-                // Send SIGINT to the process group
-                killpg(Pid::from_raw(child.id() as i32), Signal::SIGINT)?;
-            }
-            #[cfg(windows)]
-            {
-                // Send CTRL+C event to the process
-                unsafe {
-                    if GenerateConsoleCtrlEvent(winapi::um::wincon::CTRL_C_EVENT, child.id()) == 0 {
-                        return Err(io::Error::last_os_error());
+                use command_group::UnixChildExt;
+                let _ = child.signal(Signal::SIGTERM);
+                let start_time = std::time::Instant::now();
+                while start_time.elapsed() < Duration::from_millis(500) {
+                    if let Ok(Some(exit_status)) = child.try_wait() {
+                        return Ok(exit_status);
                     }
+                    sleep(Duration::from_millis(100));
                 }
-            }
-            if child.wait_timeout(Duration::from_secs(5))?.is_none() {
-                // If the process didn't exit, kill it
                 warn!("gui.py didn't exit, killing it...");
-                child.kill()?;
-                child.wait()?;
             }
+            child.kill()?;
+            Ok(child.wait()?)
+        } else {
+            Ok(ExitStatus::default())
         }
-        Ok(())
     }
 }
 
@@ -145,7 +145,8 @@ fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
     setup_alas_repo()?;
 
-    let port = get_deploy_config().as_ref()
+    let port = get_deploy_config()
+        .as_ref()
         .and_then(|config| config.get("Deploy"))
         .and_then(|deploy| deploy.get("Webui"))
         .and_then(|webui| webui.get("WebuiPort"))
@@ -164,7 +165,11 @@ fn main() -> Result<()> {
             match event {
                 tauri::RunEvent::Ready => {
                     info!("Webview is ready");
-                    app_handle.get_webview_window("main").unwrap().navigate(Url::parse(&format!("http://127.0.0.1:{}/", port)).unwrap()).unwrap();
+                    app_handle
+                        .get_webview_window("main")
+                        .unwrap()
+                        .navigate(Url::parse(&format!("http://127.0.0.1:{}/", port)).unwrap())
+                        .unwrap();
                 }
                 tauri::RunEvent::ExitRequested { .. } => {
                     info!("Webview closed, shutting down backend...");
@@ -172,8 +177,9 @@ fn main() -> Result<()> {
                         warn!("Failed to kill backend process: {:?}", e);
                     }
                     app_handle.exit(0);
+                    std::process::exit(0);
                 }
-                _  => {}
+                _ => {}
             };
         });
     Ok(())

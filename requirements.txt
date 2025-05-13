@@ -1,6 +1,6 @@
 # Image processing
 numpy==1.21.6
-scipy==1.7.3
+scipy==1.8.1
 pillow==9.5.0
 opencv-python-headless==4.7.0.72
 imageio==2.27.0
@@ -33,7 +33,7 @@ pypresence==4.2.1
 
 # Ocr
 cnocr==1.2.3.1
-mxnet==1.6.0
+mxnet==1.9.1
 
 # Webui
 pywebio==1.6.2
