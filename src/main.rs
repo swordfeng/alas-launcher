@@ -97,7 +97,7 @@ impl ManagedBackend {
         command.args(["gui.py", "--host", "127.0.0.1", "--port", &port.to_string()]);
         let mut group = command.group();
         group.kill_on_drop(true);
-        #[cfg(windows)]
+        #[cfg(all(windows, not(debug_assertions)))]
         {
             use winapi::um::winbase::CREATE_NO_WINDOW;
             group.creation_flags(CREATE_NO_WINDOW);
