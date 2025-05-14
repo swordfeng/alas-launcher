@@ -42,7 +42,7 @@ fn git_init() -> Result<()> {
 
     let status = Command::new("git")
         .args([
-            "clone",
+            "clone", "--depth", "1", "--branch", "master",
             "https://github.com/LmeSzinc/AzurLaneAutoScript.git",
             ".",
         ])
