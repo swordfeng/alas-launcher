@@ -96,6 +96,7 @@ impl ManagedBackend {
         let mut command = Command::new("python");
         command.args(["gui.py", "--host", "127.0.0.1", "--port", &port.to_string()]);
         let mut group = command.group();
+        group.kill_on_drop(true);
         #[cfg(windows)]
         {
             use winapi::um::winbase::CREATE_NO_WINDOW;
@@ -177,8 +178,6 @@ fn main() -> Result<()> {
                     if let Err(e) = backend.kill() {
                         warn!("Failed to kill backend process: {:?}", e);
                     }
-                    app_handle.exit(0);
-                    std::process::exit(0);
                 }
                 _ => {}
             };
