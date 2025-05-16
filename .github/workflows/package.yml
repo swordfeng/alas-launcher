@@ -66,19 +66,20 @@ jobs:
           echo "${ZLIB_SHA256} zlib-${ZLIB_VERSION}.tar.gz" | sha256sum --check
           tar xf "zlib-${ZLIB_VERSION}.tar.gz"
           cd "zlib-${ZLIB_VERSION}"
-          CC=musl-gcc ./configure --static --prefix="/usr/local"
+          CC=musl-gcc ./configure --static --prefix="/usr"
           make CC=musl-gcc
           sudo make install
-          sudo install -Dm644 "/usr/local/lib/libz.a" "/usr/lib/x86_64-linux-musl/libz.a"
+          sudo install -Dm644 "/usr/lib/libz.a" "/usr/lib/x86_64-linux-musl/libz.a"
       - name: Get git
         uses: knicknic/os-specific-run@v1.0.3
         with:
           linux: |
             git clone https://github.com/git/git.git --branch v2.49.0 --depth 1
             cd git
-            make configure
-            ./configure --with-openssl --with-curl --with-expat CC=musl-gcc CFLAGS='-static' LDFLAGS='-static'
-            make
+            docker run -v $PWD:/volume --rm -t clux/muslrust:stable make configure
+            docker run -v $PWD:/volume --rm -t clux/muslrust:stable \
+              ./configure --with-openssl --with-curl --with-expat CC=musl-gcc CFLAGS='-static' LDFLAGS='-static'
+            docker run -v $PWD:/volume --rm -t clux/muslrust:stable make
             strip git
           macos: |
             git clone https://github.com/git/git.git --branch v2.49.0 --depth 1
