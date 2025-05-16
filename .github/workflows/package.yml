@@ -89,19 +89,19 @@ jobs:
             cd AzurLaneAutoScript
             mkdir -p toolkit
             cp ../git/git toolkit/
-            cp ../adb/adb toolkit/
+            cp ../platform-tools/adb toolkit/
             cp -r $PYTHON_PREFIX/* toolkit/
           linux: |
             cd AzurLaneAutoScript
             mkdir -p toolkit
             cp ../git/git toolkit/
-            cp ../adb/adb toolkit/
+            cp ../platform-tools/adb toolkit/
             cp -r $PYTHON_PREFIX/* toolkit/
           windows: |
             cd AzurLaneAutoScript
             mkdir -p toolkit
             cp -r ..\git toolkit\
-            cp ..\adb\adb.exe toolkit\
+            cp ..\platform-tools\adb.exe toolkit\
             cp -r ($env:PYTHON_PREFIX + "\*") toolkit\
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
