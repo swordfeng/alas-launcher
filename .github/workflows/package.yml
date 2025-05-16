@@ -23,13 +23,10 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         include:
           - os: ubuntu-latest
-            build-shell: bash
             python-platform: linux_x86_64
           - os: macos-latest
-            build-shell: bash
             python-platform: macosx_14_0_arm64
           - os: windows-latest
-            build-shell: msys2 {0}
             python-platform: win_amd64
 
     steps:
@@ -57,7 +54,17 @@ jobs:
           pacboy: >-
             autotools
       - name: Get git
-        shell: ${{ matrix.build-shell }}
+        if: ${{ runner.os != 'Windows' }}
+        run: |
+          git clone https://github.com/git/git.git
+          cd git
+          make configure
+          ./configure --with-openssl --with-curl --with-expat CFLAGS='-static' LDFLAGS='-static'
+          make
+          strip ./git
+      - name: Get git (Windows)
+        if: ${{ runner.os == 'Windows' }}
+        shell: msys2 {0}
         run: |
           git clone https://github.com/git/git.git
           cd git
