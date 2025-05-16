@@ -51,28 +51,32 @@ jobs:
         if: ${{ runner.os == 'Windows' }}
         uses: msys2/setup-msys2@v2
         with:
+          install: >-
+            git
           pacboy: >-
             autotools
-            git
+      - name: Setup Musl (Ubuntu)
+        if: ${{ runner.os == 'Linux' }}
+        run: sudo apt-get install musl-tools
       - name: Get git
         uses: knicknic/os-specific-run@v1.0.3
         with:
           linux: |
-            git clone https://github.com/git/git.git
+            git clone https://github.com/git/git.git --depth 1
             cd git
             make configure
-            ./configure --with-openssl --with-curl --with-expat CFLAGS='-static' LDFLAGS='-static'
+            ./configure --with-openssl --with-curl --with-expat CC=musl-gcc CFLAGS='-static' LDFLAGS='-static'
             make
             strip git
           macos: |
-            git clone https://github.com/git/git.git
+            git clone https://github.com/git/git.git --depth 1
             cd git
             make configure
             ./configure --with-openssl --with-curl --with-expat
             make
             strip git
           windows: |
-            git clone https://github.com/git/git.git
+            git clone https://github.com/git/git.git --depth 1
             cd git
             make configure
             ./configure --with-openssl --with-curl --with-expat CFLAGS='-static' LDFLAGS='-static'
