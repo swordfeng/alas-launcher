@@ -32,18 +32,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-      - name: Install Python
-        shell: bash
-        run: echo "PYTHON_PREFIX=$(uv run python -c 'import sys; print(sys.exec_prefix)')" >> $GITHUB_ENV
-      - name: Install Python dependencies with customized MXNet
-        shell: bash
-        run: |
-          curl -L -O https://github.com/swordfeng/mxnet-build/releases/download/rev1/mxnet-1.9.1-cp38-cp38-${{ matrix.python-platform }}.whl
-          uvx change_wheel_version mxnet-1.9.1-cp38-cp38-${{ matrix.python-platform }}.whl --version 1.6.0
-          uv pip install --prefix "$PYTHON_PREFIX" --no-deps mxnet-1.6.0-cp38-cp38-${{ matrix.python-platform }}.whl --compile-bytecode
-          uv pip install --prefix "$PYTHON_PREFIX" -r requirements.in --compile-bytecode
+      # - name: Install uv
+      #   uses: astral-sh/setup-uv@v5
+      # - name: Install Python
+      #   shell: bash
+      #   run: echo "PYTHON_PREFIX=$(uv run python -c 'import sys; print(sys.exec_prefix)')" >> $GITHUB_ENV
+      # - name: Install Python dependencies with customized MXNet
+      #   shell: bash
+      #   run: |
+      #     curl -L -O https://github.com/swordfeng/mxnet-build/releases/download/rev1/mxnet-1.9.1-cp38-cp38-${{ matrix.python-platform }}.whl
+      #     uvx change_wheel_version mxnet-1.9.1-cp38-cp38-${{ matrix.python-platform }}.whl --version 1.6.0
+      #     uv pip install --prefix "$PYTHON_PREFIX" --no-deps mxnet-1.6.0-cp38-cp38-${{ matrix.python-platform }}.whl --compile-bytecode
+      #     uv pip install --prefix "$PYTHON_PREFIX" -r requirements.in --compile-bytecode
       - name: Setup autoconf
         if: ${{ runner.os != 'Windows' }}
         uses: srz-zumix/setup-autoconf@v0.1.1
