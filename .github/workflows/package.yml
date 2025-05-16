@@ -32,7 +32,7 @@ jobs:
         run: echo "PYTHON_PREFIX=$(uv run python -c 'import sys; print(sys.exec_prefix)')" >> $GITHUB_ENV
       - name: Install Python dependencies
         shell: bash
-        run: uv pip install --system -r "${{ github.workspace }}/requirements.in" --compile-bytecode
+        run: uv pip install -r "${{ github.workspace }}/requirements.in" --compile-bytecode
       - name: Override MXNet
         uses: knicknic/os-specific-run@v1.0.3
         with:
