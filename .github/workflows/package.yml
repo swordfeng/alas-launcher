@@ -21,6 +21,16 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            build-shell: bash
+            python-platform: linux_x86_64
+          - os: macos-latest
+            build-shell: bash
+            python-platform: macosx_14_0_arm64
+          - os: windows-latest
+            build-shell: msys2 {0}
+            python-platform: win_amd64
 
     steps:
       - name: Checkout
@@ -31,23 +41,12 @@ jobs:
         shell: bash
         run: echo "PYTHON_PREFIX=$(uv run python -c 'import sys; print(sys.exec_prefix)')" >> $GITHUB_ENV
       - name: Install Python dependencies with customized MXNet
-        uses: knicknic/os-specific-run@v1.0.3
-        with:
-          macos: |
-            curl -L -O https://github.com/swordfeng/mxnet-build/releases/download/rev1/mxnet-1.9.1-cp38-cp38-macosx_14_0_arm64.whl
-            uvx change_wheel_version mxnet-1.9.1-cp38-cp38-macosx_14_0_arm64.whl --version 1.6.0
-            uv pip install --prefix "$PYTHON_PREFIX" --no-deps mxnet-1.6.0-cp38-cp38-macosx_14_0_arm64.whl --compile-bytecode
-            uv pip install --prefix "$PYTHON_PREFIX" -r "${{ github.workspace }}/requirements.in" --compile-bytecode
-          linux: |
-            curl -L -O https://github.com/swordfeng/mxnet-build/releases/download/rev1/mxnet-1.9.1-cp38-cp38-linux_x86_64.whl
-            uvx change_wheel_version mxnet-1.9.1-cp38-cp38-linux_x86_64.whl --version 1.6.0
-            uv pip install --prefix "$PYTHON_PREFIX" --no-deps mxnet-1.6.0-cp38-cp38-linux_x86_64.whl --compile-bytecode
-            uv pip install --prefix "$PYTHON_PREFIX" -r "${{ github.workspace }}/requirements.in" --compile-bytecode
-          windows: |
-            curl -L -O https://github.com/swordfeng/mxnet-build/releases/download/rev1/mxnet-1.9.1-cp38-cp38-win_amd64.whl
-            uvx change_wheel_version mxnet-1.9.1-cp38-cp38-win_amd64.whl --version 1.6.0
-            uv pip install --prefix "$PYTHON_PREFIX" --no-deps mxnet-1.6.0-cp38-cp38-win_amd64.whl --compile-bytecode
-            uv pip install --prefix "$PYTHON_PREFIX" -r "${{ github.workspace }}/requirements.in" --compile-bytecode
+        shell: bash
+        run: |
+          curl -L -O https://github.com/swordfeng/mxnet-build/releases/download/rev1/mxnet-1.9.1-cp38-cp38-${{ matrix.python-platform }}.whl
+          uvx change_wheel_version mxnet-1.9.1-cp38-cp38-${{ matrix.python-platform }}.whl --version 1.6.0
+          uv pip install --prefix "$PYTHON_PREFIX" --no-deps mxnet-1.6.0-cp38-cp38-${{ matrix.python-platform }}.whl --compile-bytecode
+          uv pip install --prefix "$PYTHON_PREFIX" -r requirements.in --compile-bytecode
       - name: Setup autoconf
         if: ${{ runner.os != 'Windows' }}
         uses: srz-zumix/setup-autoconf@v0.1.1
@@ -58,7 +57,7 @@ jobs:
           pacboy: >-
             autotools
       - name: Get git
-        shell: bash
+        shell: ${{ matrix.build-shell }}
         run: |
           git clone https://github.com/git/git.git
           cd git
