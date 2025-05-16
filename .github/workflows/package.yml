@@ -78,7 +78,8 @@ jobs:
             cd git
             docker run -v $PWD:/volume --rm -t clux/muslrust:stable make configure
             docker run -v $PWD:/volume --rm -t clux/muslrust:stable \
-              ./configure --with-openssl --with-curl --with-expat CC=musl-gcc CFLAGS='-static' LDFLAGS='-static'
+              ./configure --with-openssl --with-curl --with-expat \
+              CC="musl-gcc -fPIE -pie" LDFLAGS="-L/musl/lib" CFLAGS="-I/musl/include"
             docker run -v $PWD:/volume --rm -t clux/muslrust:stable make
             strip git
           macos: |
