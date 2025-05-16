@@ -34,12 +34,11 @@ jobs:
         uses: actions/checkout@v4
       # - name: Install uv
       #   uses: astral-sh/setup-uv@v5
-      # - name: Install Python
-      #   shell: bash
-      #   run: echo "PYTHON_PREFIX=$(uv run python -c 'import sys; print(sys.exec_prefix)')" >> $GITHUB_ENV
-      # - name: Install Python dependencies with customized MXNet
+      # - name: Install Python and dependencies with customized MXNet
       #   shell: bash
       #   run: |
+      #     export PYTHON_PREFIX=$(uv run python -c 'import sys; print(sys.exec_prefix)')
+      #     echo "PYTHON_PREFIX=$PYTHON_PREFIX" >> $GITHUB_ENV
       #     curl -L -O https://github.com/swordfeng/mxnet-build/releases/download/rev1/mxnet-1.9.1-cp38-cp38-${{ matrix.python-platform }}.whl
       #     uvx change_wheel_version mxnet-1.9.1-cp38-cp38-${{ matrix.python-platform }}.whl --version 1.6.0
       #     uv pip install --prefix "$PYTHON_PREFIX" --no-deps mxnet-1.6.0-cp38-cp38-${{ matrix.python-platform }}.whl --compile-bytecode
@@ -68,9 +67,8 @@ jobs:
           cd "zlib-${ZLIB_VERSION}"
           CC=musl-gcc ./configure --static --prefix="/usr/local"
           make CC=musl-gcc
-          make install
-          cd ..
-          install -Dm644 "/usr/local/lib/libz.a" "/usr/lib/x86_64-linux-musl/libz.a"
+          sudo make install
+          sudo install -Dm644 "/usr/local/lib/libz.a" "/usr/lib/x86_64-linux-musl/libz.a"
       - name: Get git
         uses: knicknic/os-specific-run@v1.0.3
         with:
