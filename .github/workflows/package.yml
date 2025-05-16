@@ -47,29 +47,42 @@ jobs:
       - name: Setup autoconf
         if: ${{ runner.os != 'Windows' }}
         uses: srz-zumix/setup-autoconf@v0.1.1
-      - name: Setup autoconf (Windows)
+      - name: Setup Msys2
         if: ${{ runner.os == 'Windows' }}
         uses: msys2/setup-msys2@v2
         with:
           install: >-
             git
-          pacboy: >-
+            gcc
             autotools
       - name: Setup Musl (Ubuntu)
         if: ${{ runner.os == 'Linux' }}
-        run: sudo apt-get install musl-tools
+        run: |
+          # https://github.com/babashka/babashka/blob/master/script/setup-musl
+          sudo apt-get install -y musl-tools
+          ZLIB_VERSION="1.2.13"
+          ZLIB_SHA256="b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30"
+          curl -O -sL --fail --show-error "https://zlib.net/fossils/zlib-${ZLIB_VERSION}.tar.gz"
+          echo "${ZLIB_SHA256} zlib-${ZLIB_VERSION}.tar.gz" | sha256sum --check
+          tar xf "zlib-${ZLIB_VERSION}.tar.gz"
+          cd "zlib-${ZLIB_VERSION}"
+          CC=musl-gcc ./configure --static --prefix="/usr/local"
+          make CC=musl-gcc
+          make install
+          cd ..
+          install -Dm644 "/usr/local/lib/libz.a" "/usr/lib/x86_64-linux-musl/libz.a"
       - name: Get git
         uses: knicknic/os-specific-run@v1.0.3
         with:
           linux: |
-            git clone https://github.com/git/git.git --depth 1
+            git clone https://github.com/git/git.git --branch v2.49.0 --depth 1
             cd git
             make configure
             ./configure --with-openssl --with-curl --with-expat CC=musl-gcc CFLAGS='-static' LDFLAGS='-static'
             make
             strip git
           macos: |
-            git clone https://github.com/git/git.git --depth 1
+            git clone https://github.com/git/git.git --branch v2.49.0 --depth 1
             cd git
             make configure
             ./configure --with-openssl --with-curl --with-expat
