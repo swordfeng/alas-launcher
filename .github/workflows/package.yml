@@ -81,6 +81,7 @@ jobs:
               ./configure --with-openssl --with-curl --with-expat \
               CC="musl-gcc -fPIE -pie" LDFLAGS="-L/musl/lib" CFLAGS="-I/musl/include"
             docker run -v $PWD:/volume --rm -t clux/muslrust:stable make git
+            sudo chown -R $USER:$USER .
             strip git
           macos: |
             git clone https://github.com/git/git.git --branch v2.49.0 --depth 1
