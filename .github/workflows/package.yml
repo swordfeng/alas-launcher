@@ -67,6 +67,7 @@ jobs:
           windows: |
             curl -L -O https://github.com/git-for-windows/git/releases/download/v2.49.0.windows.1/PortableGit-2.49.0-64-bit.7z.exe
             start-process -filepath .\PortableGit-2.49.0-64-bit.7z.exe -argumentlist -o".\git", -y -wait
+            ls git\bin\git.exe
       - name: Get adb
         uses: knicknic/os-specific-run@v1.0.3
         with:
