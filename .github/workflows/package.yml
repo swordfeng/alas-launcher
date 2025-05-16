@@ -32,7 +32,7 @@ jobs:
         run: echo "PYTHON_PREFIX=$(uv run python -c 'import sys; print(sys.exec_prefix)')" >> $GITHUB_ENV
       - name: Install Python dependencies
         shell: bash
-        run: uv pip install -r "${{ github.workspace }}/requirements.in" --compile-bytecode
+        run: uv pip install --prefix "$PYTHON_PREFIX" -r "${{ github.workspace }}/requirements.in" --compile-bytecode
       - name: Override MXNet
         uses: knicknic/os-specific-run@v1.0.3
         with:
@@ -43,7 +43,7 @@ jobs:
             uvx pip install --no-deps --compile -t "$PYTHON_PREFIX/lib/python3.8" \
               https://github.com/swordfeng/mxnet-build/releases/download/rev1/mxnet-1.9.1-cp38-cp38-linux_x86_64.whl
           windows: |
-            uvx pip install --no-deps --compile -t ($env:PYTHON_PREFIX + "\Lib") \
+            uvx pip install --no-deps --compile -t ($env:PYTHON_PREFIX + "\lib") \
               https://github.com/swordfeng/mxnet-build/releases/download/rev1/mxnet-1.9.1-cp38-cp38-win_amd64.whl
       - name: Get git
         shell: bash
