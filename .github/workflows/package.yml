@@ -53,25 +53,32 @@ jobs:
         with:
           pacboy: >-
             autotools
+            git
       - name: Get git
-        if: ${{ runner.os != 'Windows' }}
-        run: |
-          git clone https://github.com/git/git.git
-          cd git
-          make configure
-          ./configure --with-openssl --with-curl --with-expat CFLAGS='-static' LDFLAGS='-static'
-          make
-          strip ./git
-      - name: Get git (Windows)
-        if: ${{ runner.os == 'Windows' }}
-        shell: msys2 {0}
-        run: |
-          git clone https://github.com/git/git.git
-          cd git
-          make configure
-          ./configure --with-openssl --with-curl --with-expat CFLAGS='-static' LDFLAGS='-static'
-          make
-          strip ./git
+        uses: knicknic/os-specific-run@v1.0.3
+        with:
+          linux: |
+            git clone https://github.com/git/git.git
+            cd git
+            make configure
+            ./configure --with-openssl --with-curl --with-expat CFLAGS='-static' LDFLAGS='-static'
+            make
+            strip git
+          macos: |
+            git clone https://github.com/git/git.git
+            cd git
+            make configure
+            ./configure --with-openssl --with-curl --with-expat
+            make
+            strip git
+          windows: |
+            git clone https://github.com/git/git.git
+            cd git
+            make configure
+            ./configure --with-openssl --with-curl --with-expat CFLAGS='-static' LDFLAGS='-static'
+            make
+            strip git.exe
+          windowsShell: msys2 {0}
       - name: Get adb
         uses: knicknic/os-specific-run@v1.0.3
         with:
