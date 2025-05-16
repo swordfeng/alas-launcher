@@ -1,0 +1,98 @@
+name: Pack alas-launcher
+
+on:
+  push:
+    branches: [ ]
+  pull_request:
+    branches: [ ]
+  workflow_dispatch: {}
+
+env:
+  UV_MANAGED_PYTHON: 1
+  UV_PYTHON_INSTALL_DIR: ${{ github.workspace }}/python
+
+jobs:
+  package:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Install Python
+        run: uv python install 3.8.20
+      - name: Install Python dependencies
+        run: uv pip install -r requirements.in --compile-bytecode
+      - name: Override MXNet
+        uses: KnicKnic/os-specific-run@v1.0.4
+        with:
+          macos: |
+            uvx pip install --no-deps --compile \
+              -t "$(uv run python -c 'import sys; print(sys.exec_prefix)')/lib/python3.8" \
+              https://github.com/swordfeng/mxnet-build/releases/download/rev1/mxnet-1.9.1-cp38-cp38-macosx_14_0_arm64.whl
+          linux: |
+            uvx pip install --no-deps --compile \
+              -t "$(uv run python -c 'import sys; print(sys.exec_prefix)')/lib/python3.8" \
+              https://github.com/swordfeng/mxnet-build/releases/download/rev1/mxnet-1.9.1-cp38-cp38-linux_x86_64.whl
+          windows: |
+            uvx pip install --no-deps --compile `
+              -t ((uv run python -c 'import sys; print(sys.exec_prefix)') + "\Lib") `
+              https://github.com/swordfeng/mxnet-build/releases/download/rev1/mxnet-1.9.1-cp38-cp38-win_amd64.whl
+      - name: Get git
+        shell: bash
+        run: |
+          git clone https://github.com/git/git.git
+          cd git
+          make configure
+          ./configure --with-openssl --with-curl --with-expat CFLAGS='-static' LDFLAGS='-static'
+          make
+          strip ./git
+      - name: Get adb
+        uses: KnicKnic/os-specific-run@v1.0.4
+        with:
+          macos: |
+            curl -L -o adb.zip https://dl.google.com/android/repository/platform-tools-latest-darwin.zip
+            unzip adb.zip
+          linux: |
+            curl -L -o adb.zip https://dl.google.com/android/repository/platform-tools-latest-linux.zip
+            unzip adb.zip
+          windows: |
+            curl -L -o adb.zip https://dl.google.com/android/repository/platform-tools-latest-windows.zip
+            tar -xvf adb.zip
+      - name: Get ALAS
+        run: |
+          git clone https://github.com/LmeSzinc/AzurLaneAutoScript.git --depth 1
+      - name: Distribute
+        uses: KnicKnic/os-specific-run@v1.0.4
+        with:
+          macos: |
+            cd AzurLaneAutoScript
+            mkdir -p toolkit
+            cp ../git/git toolkit/
+            cp ../adb/adb toolkit/
+            cp -r $(uv run python -c 'import sys; print(sys.exec_prefix)')/* toolkit/
+          linux: |
+            cd AzurLaneAutoScript
+            mkdir -p toolkit
+            cp ../git/git toolkit/
+            cp ../adb/adb toolkit/
+            cp -r $(uv run python -c 'import sys; print(sys.exec_prefix)')/* toolkit/
+          windows: |
+            cd AzurLaneAutoScript
+            mkdir -p toolkit
+            cp ../git/git.exe toolkit/
+            cp ../adb/adb.exe toolkit/
+            cp -r ((uv run python -c 'import sys; print(sys.exec_prefix)') + "\*") toolkit\
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: alas-launcher-${{ matrix.os }}
+          file: |
+            AzurLaneAutoScript

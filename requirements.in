@@ -1,8 +1,8 @@
 # Image processing
 numpy==1.21.6
 scipy==1.8.1
-pillow==9.5.0
-opencv-python-headless==4.7.0.72
+pillow
+opencv-python-headless
 imageio==2.27.0
 
 # Device connection
@@ -10,14 +10,14 @@ adbutils==0.11.0
 uiautomator2==2.16.17
 uiautomator2cache==0.3.0.1
 wrapt==1.15.0
-retrying==1.3.4
-lz4==4.3.2
+retrying
+lz4
 av==10.0.0
 psutil==5.9.3
 
 # Utils
 rich==11.2.0
-tqdm==4.65.0
+tqdm
 jellyfish==0.11.2
 pyyaml
 inflection
@@ -33,7 +33,7 @@ pypresence==4.2.1
 
 # Ocr
 cnocr==1.2.3.1
-mxnet==1.9.1
+mxnet==1.6.0
 
 # Webui
 pywebio==1.6.2
