@@ -46,15 +46,6 @@ jobs:
       - name: Setup autoconf
         if: ${{ runner.os != 'Windows' }}
         uses: srz-zumix/setup-autoconf@v0.1.1
-      - name: Setup Msys2
-        if: ${{ runner.os == 'Windows' }}
-        uses: msys2/setup-msys2@v2
-        with:
-          install: >-
-            git
-          pacboy: >-
-            gcc:p
-            autotools:p
       - name: Setup Musl (Ubuntu)
         if: ${{ runner.os == 'Linux' }}
         run: |
@@ -91,13 +82,8 @@ jobs:
             make git
             strip git
           windows: |
-            git clone https://github.com/git/git.git --depth 1
-            cd git
-            make configure
-            ./configure --with-openssl --with-curl --with-expat CFLAGS='-static' LDFLAGS='-static'
-            make git
-            strip git.exe
-          windowsShell: msys2 {0}
+            curl -L -O https://github.com/git-for-windows/git/releases/download/v2.49.0.windows.1/PortableGit-2.49.0-64-bit.7z.exe
+            start-process -filepath .\PortableGit-2.49.0-64-bit.7z.exe -argumentlist -o".\git", -y -wait
       - name: Get adb
         uses: knicknic/os-specific-run@v1.0.3
         with:
@@ -131,8 +117,8 @@ jobs:
           windows: |
             cd AzurLaneAutoScript
             mkdir -p toolkit
-            cp ../git/git.exe toolkit/
-            cp ../adb/adb.exe toolkit/
+            cp -r ..\git toolkit\
+            cp ..\adb\adb.exe toolkit\
             cp -r ($env:PYTHON_PREFIX + "\*") toolkit\
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
