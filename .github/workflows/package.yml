@@ -43,24 +43,6 @@ jobs:
           uvx change_wheel_version mxnet-1.9.1-cp38-cp38-${{ matrix.python-platform }}.whl --version 1.6.0
           uv pip install --prefix "$PYTHON_PREFIX" --no-deps mxnet-1.6.0-cp38-cp38-${{ matrix.python-platform }}.whl --compile-bytecode
           uv pip install --prefix "$PYTHON_PREFIX" -r requirements.in --compile-bytecode
-      - name: Setup autoconf
-        if: ${{ runner.os != 'Windows' }}
-        uses: srz-zumix/setup-autoconf@v0.1.1
-      - name: Setup Musl (Ubuntu)
-        if: ${{ runner.os == 'Linux' }}
-        run: |
-          # https://github.com/babashka/babashka/blob/master/script/setup-musl
-          sudo apt-get install -y musl-tools
-          ZLIB_VERSION="1.2.13"
-          ZLIB_SHA256="b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30"
-          curl -O -sL --fail --show-error "https://zlib.net/fossils/zlib-${ZLIB_VERSION}.tar.gz"
-          echo "${ZLIB_SHA256} zlib-${ZLIB_VERSION}.tar.gz" | sha256sum --check
-          tar xf "zlib-${ZLIB_VERSION}.tar.gz"
-          cd "zlib-${ZLIB_VERSION}"
-          CC=musl-gcc ./configure --static --prefix="/usr"
-          make CC=musl-gcc
-          sudo make install
-          sudo install -Dm644 "/usr/lib/libz.a" "/usr/lib/x86_64-linux-musl/libz.a"
       - name: Get git
         uses: knicknic/os-specific-run@v1.0.3
         with:
@@ -75,6 +57,7 @@ jobs:
             sudo chown -R $USER:$USER .
             strip git
           macos: |
+            brew install autoconf
             git clone https://github.com/git/git.git --branch v2.49.0 --depth 1
             cd git
             make configure
