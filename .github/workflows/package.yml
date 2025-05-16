@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install uv
         uses: astral-sh/setup-uv@v5
       - name: Install Python
@@ -31,7 +31,7 @@ jobs:
       - name: Install Python dependencies
         run: uv pip install -r requirements.in --compile-bytecode
       - name: Override MXNet
-        uses: KnicKnic/os-specific-run@v1.0.4
+        uses: knicknic/os-specific-run@v1.0.3
         with:
           macos: |
             uvx pip install --no-deps --compile \
@@ -55,7 +55,7 @@ jobs:
           make
           strip ./git
       - name: Get adb
-        uses: KnicKnic/os-specific-run@v1.0.4
+        uses: knicknic/os-specific-run@v1.0.3
         with:
           macos: |
             curl -L -o adb.zip https://dl.google.com/android/repository/platform-tools-latest-darwin.zip
@@ -70,7 +70,7 @@ jobs:
         run: |
           git clone https://github.com/LmeSzinc/AzurLaneAutoScript.git --depth 1
       - name: Distribute
-        uses: KnicKnic/os-specific-run@v1.0.4
+        uses: knicknic/os-specific-run@v1.0.3
         with:
           macos: |
             cd AzurLaneAutoScript
@@ -91,8 +91,8 @@ jobs:
             cp ../adb/adb.exe toolkit/
             cp -r ((uv run python -c 'import sys; print(sys.exec_prefix)') + "\*") toolkit\
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: alas-launcher-${{ matrix.os }}
-          file: |
+          path: |
             AzurLaneAutoScript
