@@ -80,21 +80,21 @@ jobs:
             docker run -v $PWD:/volume --rm -t clux/muslrust:stable \
               ./configure --with-openssl --with-curl --with-expat \
               CC="musl-gcc -fPIE -pie" LDFLAGS="-L/musl/lib" CFLAGS="-I/musl/include"
-            docker run -v $PWD:/volume --rm -t clux/muslrust:stable make
+            docker run -v $PWD:/volume --rm -t clux/muslrust:stable make git
             strip git
           macos: |
             git clone https://github.com/git/git.git --branch v2.49.0 --depth 1
             cd git
             make configure
             ./configure --with-openssl --with-curl --with-expat
-            make
+            make git
             strip git
           windows: |
             git clone https://github.com/git/git.git --depth 1
             cd git
             make configure
             ./configure --with-openssl --with-curl --with-expat CFLAGS='-static' LDFLAGS='-static'
-            make
+            make git
             strip git.exe
           windowsShell: msys2 {0}
       - name: Get adb
