@@ -31,21 +31,18 @@ jobs:
         run: uv python install 3.8.20 && echo "PY_EXEC_PREFIX=$(uv run python -c 'import sys; print(sys.exec_prefix)')" >> $GITHUB_ENV
       - name: Install Python dependencies
         shell: bash
-        run: cd $PY_EXEC_PREFIX && uv pip install -r requirements.in --compile-bytecode
+        run: cd $PY_EXEC_PREFIX && uv pip install -r "${{ github.workspace }}/requirements.in" --compile-bytecode
       - name: Override MXNet
         uses: knicknic/os-specific-run@v1.0.3
         with:
           macos: |
-            uvx pip install --no-deps --compile \
-              -t "$(uv run python -c 'import sys; print(sys.exec_prefix)')/lib/python3.8" \
+            cd $PY_EXEC_PREFIX && uvx pip install --no-deps --compile -t lib/python3.8 \
               https://github.com/swordfeng/mxnet-build/releases/download/rev1/mxnet-1.9.1-cp38-cp38-macosx_14_0_arm64.whl
           linux: |
-            uvx pip install --no-deps --compile \
-              -t "$(uv run python -c 'import sys; print(sys.exec_prefix)')/lib/python3.8" \
+            cd $PY_EXEC_PREFIX && uvx pip install --no-deps --compile -t lib/python3.8 \
               https://github.com/swordfeng/mxnet-build/releases/download/rev1/mxnet-1.9.1-cp38-cp38-linux_x86_64.whl
           windows: |
-            uvx pip install --no-deps --compile `
-              -t ((uv run python -c 'import sys; print(sys.exec_prefix)') + "\Lib") `
+            cd $env:PY_EXEC_PREFIX && uvx pip install --no-deps --compile -t Lib `
               https://github.com/swordfeng/mxnet-build/releases/download/rev1/mxnet-1.9.1-cp38-cp38-win_amd64.whl
       - name: Get git
         shell: bash
