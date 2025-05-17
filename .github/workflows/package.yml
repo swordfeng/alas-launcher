@@ -88,15 +88,15 @@ jobs:
         with:
           macos: |
             cd AzurLaneAutoScript
-            mkdir -p toolkit
-            cp ../git/git toolkit/
-            cp ../platform-tools/adb toolkit/
+            mkdir -p toolkit/bin
+            cp ../git/git toolkit/bin/
+            cp ../platform-tools/adb toolkit/bin/
             cp -r $PYTHON_PREFIX/* toolkit/
           linux: |
             cd AzurLaneAutoScript
-            mkdir -p toolkit
-            cp ../git/git toolkit/
-            cp ../platform-tools/adb toolkit/
+            mkdir -p toolkit/bin
+            cp ../git/git toolkit/bin/
+            cp ../platform-tools/adb toolkit/bin/
             cp -r $PYTHON_PREFIX/* toolkit/
           windows: |
             cd AzurLaneAutoScript
@@ -108,5 +108,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: alas-launcher-${{ matrix.os }}
+          include-hidden-files: true
           path: |
             AzurLaneAutoScript
