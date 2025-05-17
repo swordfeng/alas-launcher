@@ -11,7 +11,9 @@
         "title": "Alas",
         "width": 1280,
         "height": 880,
-        "url": "about:blank"
+        "url": "about:blank",
+        "acceptFirstMouse": true,
+        "visible": false
       }
     ]
   }

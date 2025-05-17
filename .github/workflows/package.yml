@@ -105,7 +105,16 @@ jobs:
             cp -r $PYTHON_PREFIX/* toolkit/
             mkdir -p config
             cp ../deploy.unix.yaml config/deploy.yaml
-            cp ../target/release/alas-launcher alas-launcher.exe  # To be git-ignored
+
+            # Make bundle
+            cd ${{ github.workspace }}
+            mkdir -p bundle/AzurLaneAutoScript.app/Contents/MacOS
+            cp target/release/alas-launcher bundle/AzurLaneAutoScript.app/Contents/MacOS/
+            mkdir -p bundle/AzurLaneAutoScript.app/Contents/Resources
+            cp icons/icon.icns bundle/AzurLaneAutoScript.app/Contents/Resources/
+            cp -r AzurLaneAutoScript bundle/AzurLaneAutoScript.app/Contents/
+            cp Info.plist bundle/AzurLaneAutoScript.app/Contents/
+            tar -cvJf AzurLaneAutoScript-${{ runner.os }}-$(uname -a).tar.xz -C bundle AzurLaneAutoScript.app
           linux: |
             cd AzurLaneAutoScript
             mkdir -p toolkit/bin
@@ -113,7 +122,10 @@ jobs:
             cp -r ../git/dist/* toolkit/
             cp -r $PYTHON_PREFIX/* toolkit/
             cp ../deploy.unix.yaml config/deploy.yaml
-            cp ../target/release/alas-launcher alas-launcher.exe  # To be git-ignored
+            cp ../target/release/alas-launcher alas-launcher
+
+            cd ${{ github.workspace }}
+            tar -cvJf AzurLaneAutoScript-${{ runner.os }}-$(uname -a).tar.xz AzurLaneAutoScript
           windows: |
             cd AzurLaneAutoScript
             mkdir -p toolkit
@@ -122,10 +134,13 @@ jobs:
             cp -r ($env:PYTHON_PREFIX + "\*") toolkit\
             cp ..\deploy.windows.yaml config\deploy.yaml
             cp ..\target\release\alas-launcher.exe alas-launcher.exe
+
+            cd ${{ github.workspace }}
+            Compress-Archive AzurLaneAutoScript "AzurLaneAutoScript-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).zip"
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: alas-launcher-${{ matrix.os }}
           include-hidden-files: true
           path: |
-            AzurLaneAutoScript
+            AzurLaneAutoScript-${{ runner.os }}-*

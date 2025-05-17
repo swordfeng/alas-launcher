@@ -2,13 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{
-    env::set_current_dir,
-    fs,
-    net::TcpStream,
-    path::PathBuf,
-    process::{Command, ExitStatus},
-    thread::sleep,
-    time::Duration,
+    cell::Cell, env::set_current_dir, ffi::OsStr, fs, net::TcpStream, path::PathBuf, process::{Command, ExitStatus}, thread::sleep, time::Duration
 };
 
 #[cfg(unix)]
@@ -20,9 +14,27 @@ use anyhow::{anyhow, Result};
 use serde_json::Value as JsonValue;
 use tracing::{info, warn};
 
-fn alas_repo_dir() -> Result<PathBuf> {
-    // Assuming portable, the executable is in the same directory as the repo
-    Ok(std::env::current_exe()?.parent().unwrap().to_path_buf())
+fn alas_repo_dir() -> PathBuf {
+    // Always check if this is a typical same-folder portable distribution
+    let exe_folder = std::env::current_exe().unwrap().parent().unwrap().to_path_buf();
+    let mut installer_py = exe_folder.clone();
+    installer_py.extend(["deploy", "installer.py"]);
+    if fs::exists(installer_py).unwrap() {
+        return exe_folder;
+    }
+    // If it's MacOS, it could be ALAS.app/Contents/AzurLaneAutoScript
+    #[cfg(target_os = "macos")]
+    {
+        if exe_folder.file_name() == Some(&OsStr::new("MacOS")) {
+            let mut repo_folder = exe_folder;
+            repo_folder.pop();
+            repo_folder.push("AzurLaneAutoScript");
+            if fs::exists(&repo_folder).unwrap() {
+                return repo_folder;
+            }
+        }
+    }
+    panic!("Cannot find ALAS repo folder");
 }
 
 fn prepend_path_to_env(key: &str, path: PathBuf) {
@@ -38,15 +50,15 @@ fn prepend_path_to_env(key: &str, path: PathBuf) {
 fn setup_environment() -> Result<()> {
     prepend_path_to_env(
         "PATH",
-        alas_repo_dir()?
+        alas_repo_dir()
             .join("toolkit")
             .join("libexec")
             .join("git-core"),
     );
-    prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit").join("bin"));
+    prepend_path_to_env("PATH", alas_repo_dir().join("toolkit").join("bin"));
     prepend_path_to_env(
         "LD_LIBRARY_PATH",
-        alas_repo_dir()?.join("toolkit").join("lib"),
+        alas_repo_dir().join("toolkit").join("lib"),
     );
     Ok(())
 }
@@ -55,16 +67,16 @@ fn setup_environment() -> Result<()> {
 fn setup_environment() -> Result<()> {
     prepend_path_to_env(
         "PATH",
-        alas_repo_dir()?.join("toolkit").join("git").join("cmd"),
+        alas_repo_dir().join("toolkit").join("git").join("cmd"),
     );
-    prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit").join("Scripts"));
-    prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit"));
+    prepend_path_to_env("PATH", alas_repo_dir().join("toolkit").join("Scripts"));
+    prepend_path_to_env("PATH", alas_repo_dir().join("toolkit"));
     Ok(())
 }
 
 fn setup_alas_repo() -> Result<()> {
     info!("Starting setup for ALAS repository...");
-    let dir = alas_repo_dir()?;
+    let dir = alas_repo_dir();
     info!("ALAS dir is {:?}", &dir);
     set_current_dir(&dir)?;
     git_update()?;
@@ -168,27 +180,36 @@ fn main() -> Result<()> {
         warn!("WebuiPort not found in config, using default port 22267");
     }
     let port = port.unwrap_or(22267) as u16;
-    info!("Starting gui.py on http://127.0.0.1:{}/", port);
-    let mut backend = ManagedBackend::new(port)?;
+
+    let mut backend = Cell::new(None);
 
     info!("Starting Webview...");
     tauri::Builder::default()
-        .plugin(tauri_plugin_single_instance::init())
+        .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
+            let _ = app.get_webview_window("main")
+                .and_then(|w| w.set_focus().ok());
+        }))
         .build(tauri::generate_context!())?
         .run(move |app_handle, event| {
             match event {
                 tauri::RunEvent::Ready => {
+                    info!("Starting gui.py on http://127.0.0.1:{}/", port);
+                    let b = ManagedBackend::new(port).unwrap();
+                    backend.set(Some(b));
                     info!("Webview is ready");
-                    app_handle
+                    let window = app_handle
                         .get_webview_window("main")
-                        .unwrap()
-                        .navigate(Url::parse(&format!("http://127.0.0.1:{}/", port)).unwrap())
                         .unwrap();
+                    window.navigate(Url::parse(&format!("http://127.0.0.1:{}/", port)).unwrap())
+                        .unwrap();
+                    window.show().unwrap();
                 }
                 tauri::RunEvent::ExitRequested { .. } => {
                     info!("Webview closed, shutting down backend...");
-                    if let Err(e) = backend.terminate() {
-                        warn!("Failed to terminate backend process: {:?}", e);
+                    if let Some(b) = backend.get_mut() {
+                        if let Err(e) = b.terminate() {
+                            warn!("Failed to terminate backend process: {:?}", e);
+                        }
                     }
                 }
                 _ => {}
