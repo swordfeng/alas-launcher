@@ -30,6 +30,11 @@ jobs:
             python-platform: win_amd64
 
     steps:
+      - name: Install Tauri dependencies (Ubuntu only)
+        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build
