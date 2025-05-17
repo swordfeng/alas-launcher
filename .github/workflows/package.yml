@@ -49,11 +49,15 @@ jobs:
           linux: |
             git clone https://github.com/git/git.git --branch v2.49.0 --depth 1
             cd git
-            docker run -v $PWD:/volume --rm -t clux/muslrust:stable make configure
-            docker run -v $PWD:/volume --rm -t clux/muslrust:stable \
+            container_id=$(docker run -d -v $PWD:/volume --rm -t clux/muslrust:stable)
+            docker exec -t $container_id apt-get update
+            docker exec -t $container_id apt-get install -y gettext
+            docker exec -t $container_id make configure
+            docker exec -t $container_id \
               ./configure --with-openssl --with-curl --with-expat --without-tcltk --prefix=/ \
-              CC="musl-gcc -fPIE -pie" LDFLAGS="-L/musl/lib" CFLAGS="-I/musl/include"
-            docker run -v $PWD:/volume --rm -t clux/muslrust:stable make RUNTIME_PREFIX=1
+              CC="musl-gcc -fPIE -pie" LDFLAGS="-L/musl/lib -static" CFLAGS="-I/musl/include -static"
+            docker exec -t $container_id make RUNTIME_PREFIX=1
+            docker exec -t $container_id make RUNTIME_PREFIX=1 install DESTDIR=/volume/dist
             sudo chown -R $USER:$USER .
           macos: |
             brew install autoconf
@@ -62,6 +66,7 @@ jobs:
             make configure
             ./configure --with-openssl --with-curl --with-expat --without-tcltk --prefix=/
             make RUNTIME_PREFIX=1
+            make RUNTIME_PREFIX=1 install DESTDIR=$PWD/dist
           windows: |
             curl -L -O https://github.com/git-for-windows/git/releases/download/v2.49.0.windows.1/MinGit-2.49.0-64-bit.zip
             mkdir git
@@ -88,20 +93,20 @@ jobs:
           macos: |
             cd AzurLaneAutoScript
             mkdir -p toolkit/bin
-            make -C ../git RUNTIME_PREFIX=1 install DESTDIR=$PWD/toolkit/
             cp ../platform-tools/adb toolkit/bin/
+            cp -r ../git/dist/* toolkit/
             cp -r $PYTHON_PREFIX/* toolkit/
           linux: |
             cd AzurLaneAutoScript
             mkdir -p toolkit/bin
-            make -C ../git RUNTIME_PREFIX=1 install DESTDIR=$PWD/toolkit/
             cp ../platform-tools/adb toolkit/bin/
+            cp -r ../git/dist/* toolkit/
             cp -r $PYTHON_PREFIX/* toolkit/
           windows: |
             cd AzurLaneAutoScript
             mkdir -p toolkit
-            cp -r ..\git toolkit\
             cp ..\platform-tools\adb.exe, ..\platform-tools\Adb*.dll toolkit\
+            cp -r ..\git toolkit\
             cp -r ($env:PYTHON_PREFIX + "\*") toolkit\
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
