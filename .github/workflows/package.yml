@@ -93,7 +93,7 @@ jobs:
             tar -xvf adb.zip
       - name: Get ALAS
         run: |
-          git clone https://github.com/LmeSzinc/AzurLaneAutoScript.git --depth 1
+          git clone https://github.com/LmeSzinc/AzurLaneAutoScript.git
       - name: Distribute
         uses: knicknic/os-specific-run@v1.0.3
         with:
@@ -114,7 +114,7 @@ jobs:
             cp icons/icon.icns bundle/AzurLaneAutoScript.app/Contents/Resources/
             cp -r AzurLaneAutoScript bundle/AzurLaneAutoScript.app/Contents/
             cp Info.plist bundle/AzurLaneAutoScript.app/Contents/
-            tar -cvJf AzurLaneAutoScript-${{ runner.os }}-$(uname -a).tar.xz -C bundle AzurLaneAutoScript.app
+            XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" -C bundle AzurLaneAutoScript.app
           linux: |
             cd AzurLaneAutoScript
             mkdir -p toolkit/bin
@@ -125,7 +125,7 @@ jobs:
             cp ../target/release/alas-launcher alas-launcher
 
             cd ${{ github.workspace }}
-            tar -cvJf AzurLaneAutoScript-${{ runner.os }}-$(uname -a).tar.xz AzurLaneAutoScript
+            XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
           windows: |
             cd AzurLaneAutoScript
             mkdir -p toolkit
@@ -136,7 +136,7 @@ jobs:
             cp ..\target\release\alas-launcher.exe alas-launcher.exe
 
             cd ${{ github.workspace }}
-            Compress-Archive AzurLaneAutoScript "AzurLaneAutoScript-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).zip"
+            Compress-Archive AzurLaneAutoScript "AzurLaneAutoScript-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).zip" -CompressionLevel Optimal
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
