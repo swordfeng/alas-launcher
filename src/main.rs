@@ -36,6 +36,7 @@ fn prepend_path_to_env(key: &str, path: PathBuf) {
 
 #[cfg(unix)]
 fn setup_environment() -> Result<()> {
+    prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit").join("libexec").join("git-core"));
     prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit").join("bin"));
     prepend_path_to_env("LD_LIBRARY_PATH", alas_repo_dir()?.join("toolkit").join("lib"));
     Ok(())
@@ -43,7 +44,8 @@ fn setup_environment() -> Result<()> {
 
 #[cfg(windows)]
 fn setup_environment() -> Result<()> {
-    prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit").join("git").join("bin"));
+    prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit").join("git").join("cmd"));
+    prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit").join("Scripts"));
     prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit"));
     Ok(())
 }
