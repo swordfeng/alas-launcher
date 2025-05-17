@@ -24,3 +24,7 @@ nix = { version = "0.30", features = ["signal"]}
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["consoleapi", "processenv", "winbase"] }
+
+[profile.release]
+strip = true
+lto = true
