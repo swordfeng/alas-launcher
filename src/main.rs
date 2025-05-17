@@ -21,38 +21,46 @@ use serde_json::Value as JsonValue;
 use tracing::{info, warn};
 
 fn alas_repo_dir() -> Result<PathBuf> {
-    let mut app_local_dir =
-        dirs::data_local_dir().ok_or_else(|| anyhow!("Unknown OS-specific data dir"))?;
-    app_local_dir.push("alas-launcher");
-    std::fs::create_dir_all(&app_local_dir)?;
-    Ok(app_local_dir)
+    // Assuming portable, the executable is in the same directory as the repo
+    Ok(std::env::current_exe()?.parent().unwrap().to_path_buf())
 }
 
-fn git_init() -> Result<()> {
-    info!("Starting git initialization...");
-    // Remove any existing content in the current directory
-    for entry in fs::read_dir(".")? {
-        let path = entry?.path();
-        if path.is_dir() {
-            fs::remove_dir_all(&path)?;
-        } else {
-            fs::remove_file(&path)?;
-        }
+fn prepend_path_to_env(key: &str, path: PathBuf) {
+    let mut paths = Vec::new();
+    paths.push(path);
+    if let Some(ref old_path) = &std::env::var_os(key) {
+        paths.extend(std::env::split_paths(old_path).into_iter());
     }
+    std::env::set_var(key, std::env::join_paths(paths).unwrap());
+}
 
-    let status = Command::new("git")
-        .args([
-            "clone", "--depth", "1", "--branch", "master",
-            "https://github.com/LmeSzinc/AzurLaneAutoScript.git",
-            ".",
-        ])
-        .status()?;
-
-    if !status.success() {
-        return Err(anyhow!("Failed to clone repository"));
-    }
-
+#[cfg(unix)]
+fn setup_environment() -> Result<()> {
+    prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit").join("bin"));
+    prepend_path_to_env("LD_LIBRARY_PATH", alas_repo_dir()?.join("toolkit").join("lib"));
     Ok(())
+}
+
+#[cfg(windows)]
+fn setup_environment() -> Result<()> {
+    prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit").join("git").join("bin"));
+    prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit"));
+    Ok(())
+}
+
+fn setup_alas_repo() -> Result<()> {
+    info!("Starting setup for ALAS repository...");
+    let dir = alas_repo_dir()?;
+    info!("ALAS dir is {:?}", &dir);
+    set_current_dir(&dir)?;
+    git_update()?;
+    Ok(())
+}
+
+fn get_deploy_config() -> Option<JsonValue> {
+    let config_content = fs::read_to_string("./config/deploy.yaml").ok()?;
+    let config: JsonValue = serde_yaml::from_str(&config_content).ok()?;
+    Some(config)
 }
 
 fn git_update() -> Result<()> {
@@ -68,25 +76,6 @@ fn git_update() -> Result<()> {
     Ok(())
 }
 
-fn setup_alas_repo() -> Result<()> {
-    info!("Starting setup for ALAS repository...");
-    let dir = alas_repo_dir()?;
-    info!("Working dir is {:?}", &dir);
-    set_current_dir(&dir)?;
-    if git_update().is_err() {
-        warn!("Git update failed, initializing repository...");
-        git_init()?;
-        git_update()?;
-    }
-    Ok(())
-}
-
-fn get_deploy_config() -> Option<JsonValue> {
-    let config_content = fs::read_to_string("./config/deploy.yaml").ok()?;
-    let config: JsonValue = serde_yaml::from_str(&config_content).ok()?;
-    Some(config)
-}
-
 struct ManagedBackend {
     child: Option<GroupChild>,
 }
@@ -96,31 +85,25 @@ impl ManagedBackend {
         let mut command = Command::new("python");
         command.args(["gui.py", "--host", "127.0.0.1", "--port", &port.to_string()]);
         let mut group = command.group();
-        group.kill_on_drop(true);
         #[cfg(all(windows, not(debug_assertions)))]
         {
             use winapi::um::winbase::CREATE_NO_WINDOW;
             group.creation_flags(CREATE_NO_WINDOW);
         }
-        let mut child = group.spawn()?;
+        let res = Self { child: Some(group.spawn()?) };
 
         let address = format!("127.0.0.1:{}", port).parse().unwrap();
         let start_time = std::time::Instant::now();
         while start_time.elapsed() < Duration::from_secs(60) {
             if TcpStream::connect_timeout(&address, Duration::from_millis(100)).is_ok() {
-                return Ok(Self { child: Some(child) });
+                return Ok(res);
             }
             sleep(Duration::from_millis(100));
-        }
-
-        match child.kill() {
-            Ok(_) => {}
-            Err(e) => warn!("Failed to kill gui.py process: {:?}", e),
         }
         Err(anyhow!("Timeout waiting for port {} to be ready", port))
     }
 
-    fn kill(&mut self) -> Result<ExitStatus> {
+    fn terminate(&mut self) -> Result<ExitStatus> {
         if let Some(mut child) = self.child.take() {
             #[cfg(unix)]
             {
@@ -143,8 +126,20 @@ impl ManagedBackend {
     }
 }
 
+impl Drop for ManagedBackend {
+    fn drop(&mut self) {
+        if let Some(mut child) = self.child.take() {
+            match child.kill() {
+                Ok(_) => {}
+                Err(e) => warn!("Failed to kill gui.py process: {:?}", e),
+            }
+        }
+    }
+}
+
 fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
+    setup_environment()?;
     setup_alas_repo()?;
 
     let port = get_deploy_config()
@@ -175,8 +170,8 @@ fn main() -> Result<()> {
                 }
                 tauri::RunEvent::ExitRequested { .. } => {
                     info!("Webview closed, shutting down backend...");
-                    if let Err(e) = backend.kill() {
-                        warn!("Failed to kill backend process: {:?}", e);
+                    if let Err(e) = backend.terminate() {
+                        warn!("Failed to terminate backend process: {:?}", e);
                     }
                 }
                 _ => {}
