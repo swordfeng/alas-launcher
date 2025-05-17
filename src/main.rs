@@ -36,15 +36,27 @@ fn prepend_path_to_env(key: &str, path: PathBuf) {
 
 #[cfg(unix)]
 fn setup_environment() -> Result<()> {
-    prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit").join("libexec").join("git-core"));
+    prepend_path_to_env(
+        "PATH",
+        alas_repo_dir()?
+            .join("toolkit")
+            .join("libexec")
+            .join("git-core"),
+    );
     prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit").join("bin"));
-    prepend_path_to_env("LD_LIBRARY_PATH", alas_repo_dir()?.join("toolkit").join("lib"));
+    prepend_path_to_env(
+        "LD_LIBRARY_PATH",
+        alas_repo_dir()?.join("toolkit").join("lib"),
+    );
     Ok(())
 }
 
 #[cfg(windows)]
 fn setup_environment() -> Result<()> {
-    prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit").join("git").join("cmd"));
+    prepend_path_to_env(
+        "PATH",
+        alas_repo_dir()?.join("toolkit").join("git").join("cmd"),
+    );
     prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit").join("Scripts"));
     prepend_path_to_env("PATH", alas_repo_dir()?.join("toolkit"));
     Ok(())
@@ -92,7 +104,9 @@ impl ManagedBackend {
             use winapi::um::winbase::CREATE_NO_WINDOW;
             group.creation_flags(CREATE_NO_WINDOW);
         }
-        let res = Self { child: Some(group.spawn()?) };
+        let res = Self {
+            child: Some(group.spawn()?),
+        };
 
         let address = format!("127.0.0.1:{}", port).parse().unwrap();
         let start_time = std::time::Instant::now();
@@ -159,6 +173,7 @@ fn main() -> Result<()> {
 
     info!("Starting Webview...");
     tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init())
         .build(tauri::generate_context!())?
         .run(move |app_handle, event| {
             match event {
