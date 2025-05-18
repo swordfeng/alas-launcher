@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{
-    cell::Cell, env::set_current_dir, ffi::OsStr, fs, net::TcpStream, path::PathBuf, process::{Command, ExitStatus}, thread::sleep, time::Duration
+    cell::Cell, env::set_current_dir, fs, net::TcpStream, path::PathBuf, process::{Command, ExitStatus}, thread::sleep, time::Duration
 };
 
 #[cfg(unix)]
@@ -25,6 +25,7 @@ fn alas_repo_dir() -> PathBuf {
     // If it's MacOS, it could be ALAS.app/Contents/AzurLaneAutoScript
     #[cfg(target_os = "macos")]
     {
+        use std::ffi::OsStr;
         if exe_folder.file_name() == Some(&OsStr::new("MacOS")) {
             let mut repo_folder = exe_folder;
             repo_folder.pop();
@@ -41,7 +42,7 @@ fn prepend_path_to_env(key: &str, path: PathBuf) {
     let mut paths = Vec::new();
     paths.push(path);
     if let Some(ref old_path) = &std::env::var_os(key) {
-        paths.extend(std::env::split_paths(old_path).into_iter());
+        paths.extend(std::env::split_paths(old_path));
     }
     std::env::set_var(key, std::env::join_paths(paths).unwrap());
 }
