@@ -1,4 +1,5 @@
 **| [English](README_en.md) | 简体中文 |**
+
 ALAS Launcher: 一种新型的 [AzurLaneAutoScript](https://github.com/LmeSzinc/AzurLaneAutoScript) 启动器
 ===
 故事背景：自从用上了 Mac Mini，PC 的开机键都懒得去按了。但是不开个 ALAS 怎么都不舒服不是……
@@ -45,18 +46,23 @@ ALAS 根目录
 * Windows: AzurLaneAutoScript
 * MacOS: AzurLaneAutoScript.app/Contents/AzurLaneAutoScript
 * Linux: AzurLaneAutoScript
+
 ALAS 启动器
 * Windows: AzurLaneAutoScript/alas-launcher.exe
 * MacOS: AzurLaneAutoScript.app/Contents/MacOS/alas-launcher
 * Linux: AzurLaneAutoScript/alas-launcher
+
 Python
 * 所有系统: toolkit （类似 venv 的结构）
+
 Git
 * Unix: 直接安装 Unix 目录结构到 toolkit
 * Windows: 解压 MinGit 到 toolkit/git
+
 Adb
 * Unix: toolkit/bin/adb
 * Windows: toolkit/adb.exe
+
 启动器会加的环境变量
 * Unix:
   - toolbox/bin

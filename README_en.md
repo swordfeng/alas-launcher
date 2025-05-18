@@ -1,4 +1,5 @@
 **| English | [简体中文](README.md) |**
+
 ALAS Launcher: A New Type of [AzurLaneAutoScript](https://github.com/LmeSzinc/AzurLaneAutoScript) Launcher
 ===
 Background: Since getting a Mac Mini, I've been too lazy to press the power button on my PC. But it feels wrong not running ALAS...
@@ -44,18 +45,23 @@ ALAS Root Directory
 * Windows: AzurLaneAutoScript
 * MacOS: AzurLaneAutoScript.app/Contents/AzurLaneAutoScript
 * Linux: AzurLaneAutoScript
+
 ALAS Launcher
 * Windows: AzurLaneAutoScript/alas-launcher.exe
 * MacOS: AzurLaneAutoScript.app/Contents/MacOS/alas-launcher
 * Linux: AzurLaneAutoScript/alas-launcher
+
 Python
 * All systems: toolkit (similar to venv structure)
+
 Git
 * Unix: Installed with Unix directory structure to toolkit
 * Windows: MinGit extracted to toolkit/git
+
 Adb
 * Unix: toolkit/bin/adb
 * Windows: toolkit/adb.exe
+
 Environment Variables Added by Launcher
 * Unix:
   - toolbox/bin
