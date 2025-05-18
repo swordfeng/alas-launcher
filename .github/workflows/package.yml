@@ -173,7 +173,7 @@ jobs:
             cp ..\target\release\alas-launcher.exe alas-launcher.exe
 
             cd ${{ github.workspace }}
-            Compress-Archive AzurLaneAutoScript "AzurLaneAutoScript-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).zip" -CompressionLevel Optimal
+            Get-ChildItem -Path AzurLaneAutoScript -Force | Compress-Archive -DestinationPath "AzurLaneAutoScript-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).zip" -CompressionLevel Optimal
 
             cp deploy.windows-cn.yaml AzurLaneAutoScript\config\deploy.yaml
             pushd AzurLaneAutoScript
@@ -181,7 +181,7 @@ jobs:
             git fetch origin master
             git reset --hard origin/master
             popd
-            Compress-Archive AzurLaneAutoScript "AzurLaneAutoScript-CN-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).zip" -CompressionLevel Optimal
+            Get-ChildItem -Path AzurLaneAutoScript -Force | Compress-Archive -DestinationPath "AzurLaneAutoScript-CN-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).zip" -CompressionLevel Optimal
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
