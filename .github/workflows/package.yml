@@ -165,13 +165,13 @@ jobs:
             cp ..\target\release\alas-launcher.exe alas-launcher.exe
 
             cd ${{ github.workspace }}
-            $env:XZ_OPT="-9"; tar -cJf "AzurLaneAutoScript-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.xz" AzurLaneAutoScript
+            $env:GZIP="-9"; tar -czf "AzurLaneAutoScript-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.xz" AzurLaneAutoScript
 
             cp deploy.windows-cn.yaml AzurLaneAutoScript\config\deploy.yaml
             pushd AzurLaneAutoScript
             uv run python -c "import deploy.git; deploy.git.GitManager().git_install()"
             popd
-            $env:XZ_OPT="-9"; tar -cJf "AzurLaneAutoScript-CN-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.xz" AzurLaneAutoScript
+            $env:GZIP="-9"; tar -czf "AzurLaneAutoScript-CN-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.xz" AzurLaneAutoScript
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
