@@ -42,6 +42,10 @@ jobs:
           macos: brew install rdfind
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Rustup for cache
+        run: rustup toolchain install stable --profile minimal
+      - name: Setup Rust cache
+        uses: Swatinem/rust-cache@v2
       - name: Build
         run: cargo build --verbose --release
       - name: Install uv
