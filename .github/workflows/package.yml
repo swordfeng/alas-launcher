@@ -73,14 +73,13 @@ jobs:
             PkgConfigDeps
             CONANFILE
             container_id=$(docker run -d -v $PWD:/volume --rm -t quay.io/pypa/manylinux2010_x86_64:latest)
-            docker_exec=(docker exec -w /volume -t $container_id)
-            $docker_exec yum update
-            $docker_exec yum install -y gettext perl-IPC-Cmd perl-Digest-SHA
-            $docker_exec pipx install conan
-            $docker_exec conan profile detect --force
-            $docker_exec conan install . --build=missing --build="m4*"
-            $docker_exec make configure
-            $docker_exec bash -c 'source conanbuild.sh; \
+            docker exec -w /volume -t $container_id yum update
+            docker exec -w /volume -t $container_id yum install -y gettext perl-IPC-Cmd perl-Digest-SHA
+            docker exec -w /volume -t $container_id pipx install conan
+            docker exec -w /volume -t $container_id conan profile detect --force
+            docker exec -w /volume -t $container_id conan install . --build=missing --build="m4*"
+            docker exec -w /volume -t $container_id make configure
+            docker exec -w /volume -t $container_id bash -c 'source conanbuild.sh; \
               export RUNTIME_PREFIX=1
               export CURL_CONFIG="pkg-config libcurl"
               LDFLAGS+=" $LIBS"
