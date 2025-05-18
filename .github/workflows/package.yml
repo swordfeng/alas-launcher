@@ -2,10 +2,8 @@ name: Pack alas-launcher
 
 on:
   push:
-    branches: []
-    tags: []
-  pull_request:
-    branches: []
+    tags:
+      - '*'
   workflow_dispatch: {}
 
 env:
