@@ -137,7 +137,11 @@ jobs:
             XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript.app
 
             cp deploy.unix-cn.yaml AzurLaneAutoScript.app/Contents/AzurLaneAutoScript/config/deploy.yaml
-            (cd AzurLaneAutoScript.app/Contents/AzurLaneAutoScript && uv run python -c "import deploy.git; deploy.git.GitManager().git_install()")
+            pushd AzurLaneAutoScript.app/Contents/AzurLaneAutoScript
+            git remote set-url origin git://git.lyoko.io/AzurLaneAutoScript
+            git fetch origin master
+            git reset --hard origin/master
+            popd
             XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
           linux: |
             cd AzurLaneAutoScript
@@ -153,7 +157,11 @@ jobs:
             XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
 
             cp deploy.unix-cn.yaml AzurLaneAutoScript/config/deploy.yaml
-            (cd AzurLaneAutoScript && uv run python -c "import deploy.git; deploy.git.GitManager().git_install()")
+            pushd AzurLaneAutoScript
+            git remote set-url origin git://git.lyoko.io/AzurLaneAutoScript
+            git fetch origin master
+            git reset --hard origin/master
+            popd
             XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
           windows: |
             cd AzurLaneAutoScript
@@ -169,7 +177,9 @@ jobs:
 
             cp deploy.windows-cn.yaml AzurLaneAutoScript\config\deploy.yaml
             pushd AzurLaneAutoScript
-            uv run python -c "import deploy.git; deploy.git.GitManager().git_install()"
+            git remote set-url origin git://git.lyoko.io/AzurLaneAutoScript
+            git fetch origin master
+            git reset --hard origin/master
             popd
             Compress-Archive AzurLaneAutoScript "AzurLaneAutoScript-CN-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).zip" -CompressionLevel Optimal
       - name: Upload artifacts
