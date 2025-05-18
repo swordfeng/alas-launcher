@@ -138,6 +138,7 @@ jobs:
             XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript.app
 
             cp deploy.unix-cn.yaml AzurLaneAutoScript.app/Contents/AzurLaneAutoScript/config/deploy.yaml
+            (cd AzurLaneAutoScript.app/Contents/AzurLaneAutoScript && uv run python -c "import deploy.git; deploy.git.GitManager().git_install()")
             XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
           linux: |
             cd AzurLaneAutoScript
@@ -153,6 +154,7 @@ jobs:
             XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
 
             cp deploy.unix-cn.yaml AzurLaneAutoScript/config/deploy.yaml
+            (cd AzurLaneAutoScript && uv run python -c "import deploy.git; deploy.git.GitManager().git_install()")
             XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
           windows: |
             cd AzurLaneAutoScript
@@ -167,14 +169,19 @@ jobs:
             Compress-Archive AzurLaneAutoScript "AzurLaneAutoScript-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).zip" -CompressionLevel Optimal
 
             cp deploy.windows-cn.yaml AzurLaneAutoScript\config\deploy.yaml
+            $(cd AzurLaneAutoScript && uv run python -c "import deploy.git; deploy.git.GitManager().git_install()")
             Compress-Archive AzurLaneAutoScript "AzurLaneAutoScript-CN-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).zip" -CompressionLevel Optimal
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: alas-launcher-${{ matrix.os }}
-          include-hidden-files: true
+          name: AzurLaneAutoScript-${{ matrix.os }}
           path: |
             AzurLaneAutoScript-${{ runner.os }}-*
+      - name: Upload artifacts (CN)
+        uses: actions/upload-artifact@v4
+        with:
+          name: AzurLaneAutoScript-CN-${{ matrix.os }}
+          path: |
             AzurLaneAutoScript-CN-${{ runner.os }}-*
       - name: Release
         uses: softprops/action-gh-release@v2
