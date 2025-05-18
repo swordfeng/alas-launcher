@@ -168,7 +168,9 @@ jobs:
             Compress-Archive AzurLaneAutoScript "AzurLaneAutoScript-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).zip" -CompressionLevel Optimal
 
             cp deploy.windows-cn.yaml AzurLaneAutoScript\config\deploy.yaml
-            $(cd AzurLaneAutoScript && uv run python -c "import deploy.git; deploy.git.GitManager().git_install()")
+            pushd AzurLaneAutoScript
+            uv run python -c "import deploy.git; deploy.git.GitManager().git_install()"
+            popd
             Compress-Archive AzurLaneAutoScript "AzurLaneAutoScript-CN-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).zip" -CompressionLevel Optimal
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
