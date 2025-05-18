@@ -2,7 +2,14 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{
-    cell::Cell, env::set_current_dir, fs, net::TcpStream, path::PathBuf, process::{Command, ExitStatus}, thread::sleep, time::Duration
+    cell::Cell,
+    env::set_current_dir,
+    fs,
+    net::TcpStream,
+    path::PathBuf,
+    process::{Command, ExitStatus},
+    thread::sleep,
+    time::Duration,
 };
 
 #[cfg(unix)]
@@ -16,7 +23,11 @@ use tracing::{info, warn};
 
 fn alas_repo_dir() -> PathBuf {
     // Always check if this is a typical same-folder portable distribution
-    let exe_folder = std::env::current_exe().unwrap().parent().unwrap().to_path_buf();
+    let exe_folder = std::env::current_exe()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .to_path_buf();
     let mut installer_py = exe_folder.clone();
     installer_py.extend(["deploy", "installer.py"]);
     if fs::exists(installer_py).unwrap() {
@@ -75,11 +86,23 @@ fn setup_environment() -> Result<()> {
     Ok(())
 }
 
+#[cfg(target_os = "linux")]
+fn setup_git_ca_bundle() {
+    let cert_file = openssl_probe::probe().cert_file;
+    if let Some(file) = cert_file.as_ref().and_then(|f| f.to_str()) {
+        let _ = Command::new("git")
+            .args(["config", "--local", "http.sslCAInfo", file])
+            .status();
+    }
+}
+
 fn setup_alas_repo() -> Result<()> {
     info!("Starting setup for ALAS repository...");
     let dir = alas_repo_dir();
     info!("ALAS dir is {:?}", &dir);
     set_current_dir(&dir)?;
+    #[cfg(target_os = "linux")]
+    setup_git_ca_bundle();
     atomic_failure_cleanup("./config")?;
     git_update()?;
     Ok(())
@@ -199,7 +222,8 @@ fn main() -> Result<()> {
     info!("Starting Webview...");
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
-            let _ = app.get_webview_window("main")
+            let _ = app
+                .get_webview_window("main")
                 .and_then(|w| w.set_focus().ok());
         }))
         .build(tauri::generate_context!())?
@@ -210,10 +234,9 @@ fn main() -> Result<()> {
                     let b = ManagedBackend::new(port).unwrap();
                     backend.set(Some(b));
                     info!("Webview is ready");
-                    let window = app_handle
-                        .get_webview_window("main")
-                        .unwrap();
-                    window.navigate(Url::parse(&format!("http://127.0.0.1:{}/", port)).unwrap())
+                    let window = app_handle.get_webview_window("main").unwrap();
+                    window
+                        .navigate(Url::parse(&format!("http://127.0.0.1:{}/", port)).unwrap())
                         .unwrap();
                     window.show().unwrap();
                 }
