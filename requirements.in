@@ -33,7 +33,7 @@ pypresence==4.2.1
 
 # Ocr
 cnocr==1.2.3.1
-mxnet==1.6.0
+mxnet==1.6.99  # Modified version which does not actually exist
 
 # Webui
 pywebio==1.6.2
