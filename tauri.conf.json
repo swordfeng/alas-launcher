@@ -13,7 +13,8 @@
         "height": 880,
         "url": "about:blank",
         "acceptFirstMouse": true,
-        "visible": false
+        "visible": false,
+        "create": false
       }
     ]
   }
