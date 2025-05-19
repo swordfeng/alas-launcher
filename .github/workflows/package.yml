@@ -138,13 +138,13 @@ jobs:
             cp -r AzurLaneAutoScript AzurLaneAutoScript.app/Contents/
             cp Info.plist AzurLaneAutoScript.app/Contents/
             rdfind -minsize 128 -makehardlinks true AzurLaneAutoScript.app
-            XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript.app
+            XZ_OPT=-4 tar -cJf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript.app
 
             cp deploy.unix-cn.yaml AzurLaneAutoScript.app/Contents/AzurLaneAutoScript/config/deploy.yaml
             pushd AzurLaneAutoScript.app/Contents/AzurLaneAutoScript
             uv run python -c "import deploy.git; deploy.git.GitManager().git_install()"
             popd
-            XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript.app
+            XZ_OPT=-4 tar -cJf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript.app
           linux: |
             cd AzurLaneAutoScript
             mkdir -p toolkit/bin
@@ -156,13 +156,13 @@ jobs:
 
             cd ${{ github.workspace }}
             rdfind -minsize 128 -makehardlinks true AzurLaneAutoScript
-            XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
+            XZ_OPT=-4 tar -cJf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
 
             cp deploy.unix-cn.yaml AzurLaneAutoScript/config/deploy.yaml
             pushd AzurLaneAutoScript
             uv run python -c "import deploy.git; deploy.git.GitManager().git_install()"
             popd
-            XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
+            XZ_OPT=-4 tar -cJf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
           windows: |
             cd AzurLaneAutoScript
             mkdir -p toolkit
