@@ -141,8 +141,10 @@ jobs:
             XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript.app
 
             cp deploy.unix-cn.yaml AzurLaneAutoScript.app/Contents/AzurLaneAutoScript/config/deploy.yaml
-            (cd AzurLaneAutoScript.app/Contents/AzurLaneAutoScript && uv run python -c "import deploy.git; deploy.git.GitManager().git_install()")
-            XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
+            pushd AzurLaneAutoScript.app/Contents/AzurLaneAutoScript
+            uv run python -c "import deploy.git; deploy.git.GitManager().git_install()"
+            popd
+            XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript.app
           linux: |
             cd AzurLaneAutoScript
             mkdir -p toolkit/bin
@@ -157,7 +159,9 @@ jobs:
             XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
 
             cp deploy.unix-cn.yaml AzurLaneAutoScript/config/deploy.yaml
-            (cd AzurLaneAutoScript && uv run python -c "import deploy.git; deploy.git.GitManager().git_install()")
+            pushd AzurLaneAutoScript
+            uv run python -c "import deploy.git; deploy.git.GitManager().git_install()"
+            popd
             XZ_OPT=-9 tar -cJf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
           windows: |
             cd AzurLaneAutoScript
