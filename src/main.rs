@@ -201,7 +201,7 @@ impl Drop for ManagedBackend {
     }
 }
 
-static ALAS_LANUCHER_INJECTION_JS: &'static str = r#"
+static ALAS_LANUCHER_INJECTION_JS: &str = r#"
 if (!window.alas_launcher_injected) {
     window.alas_launcher_injected = true;
     (function () {
@@ -242,23 +242,19 @@ fn save_as(app_handle: tauri::AppHandle, filename: &str, data: &str) {
             }),
         Err(e) => {
             error!("Failed to decode file content: {:?}", e);
-            return;
         }
-    };
+    }
 }
 
 fn page_load_injector(webview: WebviewWindow, payload: PageLoadPayload<'_>) {
-    match payload.event() {
-        PageLoadEvent::Finished => {
-            info!(
-                "Injecting saveFile function to loaded page: {}",
-                payload.url()
-            );
-            if let Err(e) = webview.eval(ALAS_LANUCHER_INJECTION_JS) {
-                error!("Failed to inject JS to webview: {:?}", e);
-            }
+    if payload.event() == PageLoadEvent::Finished {
+        info!(
+            "Injecting saveFile function to loaded page: {}",
+            payload.url()
+        );
+        if let Err(e) = webview.eval(ALAS_LANUCHER_INJECTION_JS) {
+            error!("Failed to inject JS to webview: {:?}", e);
         }
-        _ => {}
     }
 }
 
