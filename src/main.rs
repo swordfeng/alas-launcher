@@ -1,5 +1,5 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+// No default console window createion on Windows
+#![windows_subsystem = "windows"]
 
 use std::{
     cell::Cell,
@@ -14,8 +14,6 @@ use std::{
 
 use anyhow::{anyhow, Result};
 use base64::{prelude::BASE64_STANDARD, Engine};
-#[cfg(unix)]
-use command_group::Signal;
 use command_group::{CommandGroup, GroupChild};
 use serde_json::Value as JsonValue;
 use tauri::{
@@ -107,6 +105,7 @@ fn setup_alas_repo() -> Result<()> {
     set_current_dir(&dir)?;
     #[cfg(target_os = "linux")]
     setup_git_ca_bundle();
+    // Similar setup to deploy/installer.py
     atomic_failure_cleanup("./config")?;
     git_update()?;
     Ok(())
@@ -124,6 +123,7 @@ fn git_update() -> Result<()> {
             "-c",
             "import deploy.git; deploy.git.GitManager().git_install()",
         ])
+        .create_no_window()
         .status()?;
     if !status.success() {
         return Err(anyhow!("Failed to update repository"));
@@ -138,6 +138,7 @@ fn atomic_failure_cleanup(path: &str) -> Result<()> {
             "import sys; from deploy.atomic import atomic_failure_cleanup; atomic_failure_cleanup(sys.argv[1])",
             path,
         ])
+        .create_no_window()
         .status()?;
     Ok(())
 }
@@ -148,17 +149,12 @@ struct ManagedBackend {
 
 impl ManagedBackend {
     fn new(port: u16) -> Result<Self> {
-        let mut command = Command::new("python");
-        command.args(["gui.py", "--host", "127.0.0.1", "--port", &port.to_string()]);
-        let mut group = command.group();
-        #[cfg(all(windows, not(debug_assertions)))]
-        {
-            use winapi::um::winbase::CREATE_NO_WINDOW;
-            group.creation_flags(CREATE_NO_WINDOW);
-        }
-        let res = Self {
-            child: Some(group.spawn()?),
-        };
+        let child = Command::new("python")
+            .args(["gui.py", "--host", "127.0.0.1", "--port", &port.to_string()])
+            .group()
+            .create_no_window()
+            .spawn()?;
+        let res = Self { child: Some(child) };
 
         let address = format!("127.0.0.1:{}", port).parse().unwrap();
         let start_time = std::time::Instant::now();
@@ -175,7 +171,7 @@ impl ManagedBackend {
         if let Some(mut child) = self.child.take() {
             #[cfg(unix)]
             {
-                use command_group::UnixChildExt;
+                use command_group::{Signal, UnixChildExt};
                 let _ = child.signal(Signal::SIGTERM);
                 let start_time = std::time::Instant::now();
                 while start_time.elapsed() < Duration::from_millis(500) {
@@ -267,6 +263,11 @@ fn page_load_injector(webview: WebviewWindow, payload: PageLoadPayload<'_>) {
 }
 
 fn main() -> Result<()> {
+    #[cfg(windows)]
+    unsafe {
+        use winapi::um::wincon::{AttachConsole, ATTACH_PARENT_PROCESS};
+        HAS_CONSOLE.store(AttachConsole(ATTACH_PARENT_PROCESS) != 0, Ordering::Relaxed);
+    }
     tracing_subscriber::fmt::init();
     setup_environment()?;
     setup_alas_repo()?;
@@ -333,4 +334,48 @@ fn main() -> Result<()> {
             };
         });
     Ok(())
+}
+
+////// Utility: hide console windows at start (Windows)
+#[cfg(windows)]
+use command_group::builder::CommandGroupBuilder;
+#[cfg(windows)]
+use std::sync::atomic::{AtomicBool, Ordering};
+#[cfg(windows)]
+static HAS_CONSOLE: AtomicBool = AtomicBool::new(false);
+
+trait CreateNoWindow {
+    fn create_no_window(&mut self) -> &mut Self;
+}
+
+#[cfg(windows)]
+impl CreateNoWindow for Command {
+    fn create_no_window(&mut self) -> &mut Self {
+        use std::os::windows::process::CommandExt;
+        use winapi::um::winbase::CREATE_NO_WINDOW;
+        if !HAS_CONSOLE.load(Ordering::Relaxed) {
+            self.creation_flags(CREATE_NO_WINDOW)
+        } else {
+            self
+        }
+    }
+}
+
+#[cfg(windows)]
+impl<T> CreateNoWindow for CommandGroupBuilder<'_, T> {
+    fn create_no_window(&mut self) -> &mut Self {
+        use winapi::um::winbase::CREATE_NO_WINDOW;
+        if !HAS_CONSOLE.load(Ordering::Relaxed) {
+            self.creation_flags(CREATE_NO_WINDOW)
+        } else {
+            self
+        }
+    }
+}
+
+#[cfg(not(windows))]
+impl<T> CreateNoWindow for T {
+    fn create_no_window(&mut self) -> &mut Self {
+        self
+    }
 }
