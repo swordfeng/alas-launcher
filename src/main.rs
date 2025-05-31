@@ -205,7 +205,12 @@ static ALAS_LANUCHER_INJECTION_JS: &str = r#"
 if (!window.alas_launcher_injected) {
     window.alas_launcher_injected = true;
     (function () {
-        // const origSaveAs = window.saveAs;
+        // Prevent going back
+        history.pushState(null, document.title, location.href);
+        window.addEventListener('popstate', event => {
+            history.pushState(null, document.title, location.href);
+        });
+        // Overwrite original saveAs function
         window.saveAs = function (blob, filename) {
             const reader = new FileReader();
             reader.onload = async () => {
