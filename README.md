@@ -21,6 +21,13 @@ ALAS Launcher: 一种新型的 [AzurLaneAutoScript](https://github.com/LmeSzinc/
 ---
 因为 ALAS 用 GPLv3 所以咱也用 GPLv3。依赖软件大多是Apache2，BSD3啥的，请自行去上游找吧。。。
 
+截图
+---
+<table><tr>
+<td><img src="screenshots/mac-cn.webp" width="640px"></td>
+<td><img src="screenshots/win-cn.webp" width="580px"></td>
+</tr></table>
+
 和原版的区别
 ---
 1. 当然是全平台。

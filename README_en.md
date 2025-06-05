@@ -20,6 +20,13 @@ License
 ---
 Since ALAS uses GPLv3, we use GPLv3 too. Most dependencies use Apache2, BSD3, etc. - please check upstream repos for details.
 
+Screenshots
+---
+<table><tr>
+<td><img src="screenshots/mac-en.webp" width="640px"></td>
+<td><img src="screenshots/win-en.webp" width="580px"></td>
+</tr></table>
+
 Differences from Original Version
 ---
 1. Cross-platform, of course.
