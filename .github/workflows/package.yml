@@ -172,6 +172,7 @@ jobs:
             cp ../platform-tools/adb toolkit/bin/
             cp -r ../git/dist/* toolkit/
             cp -r $PYTHON_PREFIX/* toolkit/
+            mkdir -p config
             cp ../deploy.unix.yaml config/deploy.yaml
             cp ../target/release/alas-launcher alas-launcher
 
