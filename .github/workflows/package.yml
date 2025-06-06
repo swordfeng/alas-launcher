@@ -133,6 +133,8 @@ jobs:
             mkdir -p toolkit/bin
             cp ../platform-tools/adb toolkit/bin/
             cp -r ../git/dist/* toolkit/
+            cp ../pip_hook.py toolkit/
+            uv run python -m toolkit.pip_hook
             cp -r $PYTHON_PREFIX/* toolkit/
             mkdir -p config
             cp ../deploy.unix.yaml config/deploy.yaml
@@ -171,6 +173,8 @@ jobs:
             mkdir -p toolkit/bin
             cp ../platform-tools/adb toolkit/bin/
             cp -r ../git/dist/* toolkit/
+            cp ../pip_hook.py toolkit/
+            uv run python -m toolkit.pip_hook
             cp -r $PYTHON_PREFIX/* toolkit/
             mkdir -p config
             cp ../deploy.unix.yaml config/deploy.yaml
@@ -204,7 +208,10 @@ jobs:
             mkdir -p toolkit
             cp ..\platform-tools\adb.exe, ..\platform-tools\Adb*.dll toolkit\
             cp -r ..\git toolkit\
+            cp ..\pip_hook.py toolkit\
+            uv run python -m toolkit.pip_hook
             cp -r ($env:PYTHON_PREFIX + "\*") toolkit\
+            mkdir -p config
             cp ..\deploy.windows.yaml config\deploy.yaml
             cp ..\target\release\alas-launcher.exe alas-launcher.exe
 
