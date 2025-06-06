@@ -145,7 +145,7 @@ jobs:
             cp -r AzurLaneAutoScript AzurLaneAutoScript.app/Contents/
             cp Info.plist AzurLaneAutoScript.app/Contents/
             rdfind -minsize 128 -makehardlinks true AzurLaneAutoScript.app
-            tar -cf - AzurLaneAutoScript.app | zstd --ultra -22 --long -o "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.zst"
+            tar --use-compress-program='xz -4' -cf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript.app
 
             cp deploy.unix-cn.yaml AzurLaneAutoScript.app/Contents/AzurLaneAutoScript/config/deploy.yaml
             pushd AzurLaneAutoScript.app/Contents/AzurLaneAutoScript
@@ -158,7 +158,7 @@ jobs:
             git checkout origin/master -- deploy
 
             popd
-            tar -cf - AzurLaneAutoScript.app | zstd --ultra -22 --long -o "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.zst"
+            tar --use-compress-program='xz -4' -cf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript.app
           linux: |
             cd AzurLaneAutoScript
 
@@ -178,7 +178,7 @@ jobs:
 
             cd ${{ github.workspace }}
             rdfind -minsize 128 -makehardlinks true AzurLaneAutoScript
-            tar -cf - AzurLaneAutoScript | zstd --ultra -22 --long -o "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.zst"
+            tar --use-compress-program='xz -4' -cf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
 
             cp deploy.unix-cn.yaml AzurLaneAutoScript/config/deploy.yaml
             pushd AzurLaneAutoScript
@@ -191,7 +191,7 @@ jobs:
             git checkout origin/master -- deploy
 
             popd
-            tar -cf - AzurLaneAutoScript | zstd --ultra -22 --long -o "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.zst"
+            tar --use-compress-program='xz -4' -cf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
           windows: |
             cd AzurLaneAutoScript
 
@@ -209,7 +209,7 @@ jobs:
             cp ..\target\release\alas-launcher.exe alas-launcher.exe
 
             cd ${{ github.workspace }}
-            tar -cf - AzurLaneAutoScript | zstd --ultra -22 --long -o "AzurLaneAutoScript-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.zst"
+            tar -cf - AzurLaneAutoScript | zstd -9 --long -o "AzurLaneAutoScript-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.zst"
 
             cp deploy.windows-cn.yaml AzurLaneAutoScript\config\deploy.yaml
             pushd AzurLaneAutoScript
@@ -222,7 +222,7 @@ jobs:
             git checkout origin/master -- deploy
 
             popd
-            tar -cf - AzurLaneAutoScript | zstd --ultra -22 --long -o "AzurLaneAutoScript-CN-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.zst"
+            tar -cf - AzurLaneAutoScript | zstd -9 --long -o "AzurLaneAutoScript-CN-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.zst"
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
