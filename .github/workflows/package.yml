@@ -201,10 +201,11 @@ jobs:
             git reset --hard
             git checkout origin/master -- deploy
 
-            mkdir -p toolkit
+            mkdir -ea 0 toolkit
             cp ..\platform-tools\adb.exe, ..\platform-tools\Adb*.dll toolkit\
             cp -r ..\git toolkit\
             cp -r ($env:PYTHON_PREFIX + "\*") toolkit\
+            mkdir -ea 0 config
             cp ..\deploy.windows.yaml config\deploy.yaml
             cp ..\target\release\alas-launcher.exe alas-launcher.exe
 
