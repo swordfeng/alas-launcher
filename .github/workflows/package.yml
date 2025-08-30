@@ -129,6 +129,7 @@ jobs:
             git checkout --orphan master
             git reset --hard
             git checkout origin/master -- deploy
+            rm -rf .git
 
             mkdir -p toolkit/bin
             cp ../platform-tools/adb toolkit/bin/
@@ -148,16 +149,6 @@ jobs:
             tar --use-compress-program='xz -4' -cf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript.app
 
             cp deploy.unix-cn.yaml AzurLaneAutoScript.app/Contents/AzurLaneAutoScript/config/deploy.yaml
-            pushd AzurLaneAutoScript.app/Contents/AzurLaneAutoScript
-            uv run python -c "import deploy.git; deploy.git.GitManager().git_install()"
-
-            git checkout --detach origin/master
-            git branch -d master
-            git checkout --orphan master
-            git reset --hard
-            git checkout origin/master -- deploy
-
-            popd
             tar --use-compress-program='xz -4' -cf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript.app
           linux: |
             cd AzurLaneAutoScript
@@ -167,6 +158,7 @@ jobs:
             git checkout --orphan master
             git reset --hard
             git checkout origin/master -- deploy
+            rm -rf .git
 
             mkdir -p toolkit/bin
             cp ../platform-tools/adb toolkit/bin/
@@ -181,16 +173,6 @@ jobs:
             tar --use-compress-program='xz -4' -cf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
 
             cp deploy.unix-cn.yaml AzurLaneAutoScript/config/deploy.yaml
-            pushd AzurLaneAutoScript
-            uv run python -c "import deploy.git; deploy.git.GitManager().git_install()"
-
-            git checkout --detach origin/master
-            git branch -d master
-            git checkout --orphan master
-            git reset --hard
-            git checkout origin/master -- deploy
-
-            popd
             tar --use-compress-program='xz -4' -cf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
           windows: |
             cd AzurLaneAutoScript
@@ -200,6 +182,7 @@ jobs:
             git checkout --orphan master
             git reset --hard
             git checkout origin/master -- deploy
+            rm -r -fo .git
 
             mkdir -ea 0 toolkit
             cp ..\platform-tools\adb.exe, ..\platform-tools\Adb*.dll toolkit\
@@ -213,16 +196,6 @@ jobs:
             tar -cf - AzurLaneAutoScript | zstd -9 --long -o "AzurLaneAutoScript-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.zst"
 
             cp deploy.windows-cn.yaml AzurLaneAutoScript\config\deploy.yaml
-            pushd AzurLaneAutoScript
-            uv run python -c "import deploy.git; deploy.git.GitManager().git_install()"
-
-            git checkout --detach origin/master
-            git branch -d master
-            git checkout --orphan master
-            git reset --hard
-            git checkout origin/master -- deploy
-
-            popd
             tar -cf - AzurLaneAutoScript | zstd -9 --long -o "AzurLaneAutoScript-CN-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.zst"
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
