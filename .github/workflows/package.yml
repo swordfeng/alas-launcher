@@ -56,7 +56,7 @@ jobs:
           export PYTHON_PREFIX=$(uv run python -c 'import sys; print(sys.exec_prefix)')
           echo "PYTHON_PREFIX=$PYTHON_PREFIX" >> $GITHUB_ENV
           curl -L -O https://github.com/swordfeng/mxnet-build/releases/download/rev1/mxnet-1.9.1-cp38-cp38-${{ matrix.python-platform }}.whl
-          uvx change_wheel_version mxnet-1.9.1-cp38-cp38-${{ matrix.python-platform }}.whl --version 1.6.99
+          UV_PYTHON= uvx change_wheel_version mxnet-1.9.1-cp38-cp38-${{ matrix.python-platform }}.whl --version 1.6.99
           uv pip install --prefix "$PYTHON_PREFIX" --no-deps mxnet-1.6.99-cp38-cp38-${{ matrix.python-platform }}.whl
           uv pip install --prefix "$PYTHON_PREFIX" -r requirements.in
       - name: Get git
