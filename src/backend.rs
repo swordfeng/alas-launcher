@@ -17,6 +17,7 @@ pub struct ManagedBackend {
 
 impl ManagedBackend {
     pub fn new(port: u16) -> Result<Self> {
+        std::env::set_var("ALAS_LAUNCHER_PID", format!("{}", std::process::id()));
         let child = Command::new("python")
             .args(["gui.py", "--host", "127.0.0.1", "--port", &port.to_string()])
             .group()
@@ -64,6 +65,18 @@ impl Drop for ManagedBackend {
             match child.kill() {
                 Ok(_) => {}
                 Err(e) => warn!("Failed to kill gui.py process: {:?}", e),
+            }
+        }
+        // Kill potential leaked processes
+        let sys = sysinfo::System::new_all();
+        for (pid, process) in sys.processes() {
+            for var in process.environ() {
+                if pid.as_u32() != std::process::id()
+                    && var.to_str().unwrap_or_default()
+                        == format!("ALAS_LAUNCHER_PID={}", std::process::id())
+                {
+                    process.kill();
+                }
             }
         }
     }
