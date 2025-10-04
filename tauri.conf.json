@@ -15,6 +15,16 @@
         "acceptFirstMouse": true,
         "visible": false,
         "create": false
+      },
+      {
+        "label": "splash",
+        "title": "Alas Launcher",
+        "width": 640,
+        "height": 180,
+        "url": "about:blank",
+        "acceptFirstMouse": true,
+        "visible": true,
+        "create": true
       }
     ]
   }
