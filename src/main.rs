@@ -28,6 +28,8 @@ use crate::{
 fn main() -> Result<()> {
     #[cfg(windows)]
     unsafe {
+        use crate::window_util::HAS_CONSOLE;
+        use std::sync::atomic::Ordering;
         use winapi::um::wincon::{AttachConsole, ATTACH_PARENT_PROCESS};
         HAS_CONSOLE.store(AttachConsole(ATTACH_PARENT_PROCESS) != 0, Ordering::Relaxed);
     }

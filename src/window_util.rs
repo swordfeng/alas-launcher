@@ -2,9 +2,11 @@
 #[cfg(windows)]
 use command_group::builder::CommandGroupBuilder;
 #[cfg(windows)]
+use std::process::Command;
+#[cfg(windows)]
 use std::sync::atomic::{AtomicBool, Ordering};
 #[cfg(windows)]
-static HAS_CONSOLE: AtomicBool = AtomicBool::new(false);
+pub static HAS_CONSOLE: AtomicBool = AtomicBool::new(false);
 
 pub trait CreateNoWindow {
     fn create_no_window(&mut self) -> &mut Self;
