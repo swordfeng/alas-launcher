@@ -146,10 +146,10 @@ jobs:
             cp -r AzurLaneAutoScript AzurLaneAutoScript.app/Contents/
             cp Info.plist AzurLaneAutoScript.app/Contents/
             rdfind -minsize 128 -makehardlinks true AzurLaneAutoScript.app
-            tar --use-compress-program='xz -4' -cf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript.app
+            uv run python -c "import tarfile; tarfile.open('AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz', 'x:xz', preset=4).add('AzurLaneAutoScript.app')"
 
             cp deploy.unix-cn.yaml AzurLaneAutoScript.app/Contents/AzurLaneAutoScript/config/deploy.yaml
-            tar --use-compress-program='xz -4' -cf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript.app
+            uv run python -c "import tarfile; tarfile.open('AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz', 'x:xz', preset=4).add('AzurLaneAutoScript.app')"
           linux: |
             cd AzurLaneAutoScript
 
@@ -170,10 +170,10 @@ jobs:
 
             cd ${{ github.workspace }}
             rdfind -minsize 128 -makehardlinks true AzurLaneAutoScript
-            tar --use-compress-program='xz -4' -cf "AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
+            uv run python -c "import tarfile; tarfile.open('AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz', 'x:xz', preset=4).add('AzurLaneAutoScript')"
 
             cp deploy.unix-cn.yaml AzurLaneAutoScript/config/deploy.yaml
-            tar --use-compress-program='xz -4' -cf "AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz" AzurLaneAutoScript
+            uv run python -c "import tarfile; tarfile.open('AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz', 'x:xz', preset=4).add('AzurLaneAutoScript')"
           windows: |
             cd AzurLaneAutoScript
 
@@ -193,10 +193,10 @@ jobs:
             cp ..\target\release\alas-launcher.exe alas-launcher.exe
 
             cd ${{ github.workspace }}
-            tar -cf - AzurLaneAutoScript | zstd -9 --long -o "AzurLaneAutoScript-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.zst"
+            uv run python -c "import tarfile; tarfile.open('AzurLaneAutoScript-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.xz', 'x:xz', preset=4).add('AzurLaneAutoScript')"
 
             cp deploy.windows-cn.yaml AzurLaneAutoScript\config\deploy.yaml
-            tar -cf - AzurLaneAutoScript | zstd -9 --long -o "AzurLaneAutoScript-CN-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.zst"
+            uv run python -c "import tarfile; tarfile.open('AzurLaneAutoScript-CN-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.xz', 'x:xz', preset=4).add('AzurLaneAutoScript')"
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
