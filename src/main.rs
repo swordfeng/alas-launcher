@@ -81,7 +81,6 @@ fn main() -> Result<()> {
                     thread::spawn(move || {
                         let splash = app_handle.get_webview_window("splash").unwrap();
                         let status_updater = |text: &str| {
-                            info!("status_updater: {text}");
                             let content = format!("Loading ALAS, please wait..\n\n{}", text);
                             let url = Url::parse(&text_to_splash(&content)).unwrap();
                             splash.navigate(url).unwrap();

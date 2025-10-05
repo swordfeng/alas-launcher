@@ -147,7 +147,6 @@ def decorate_execute(fn):
     def new_fn(*args, **kwargs):
         if len(args) >= 1 and ' fetch ' in args[0] and '--progress' not in args[0]:
             args = (args[0].replace(' fetch ', ' fetch --progress '),) + args[1:]
-        print(args, kwargs)
         return fn(*args, **kwargs)
     return new_fn
 gm = deploy.git.GitManager()
@@ -185,7 +184,7 @@ gm.git_install()
         if line.contains("=====") {
             let sanitized = line.replace("=", " ").trim().to_owned();
             status_updater(&format!("Updating ALAS: {sanitized}"));
-        } else if line.contains("objects:") {
+        } else if line.contains("objects:") || line.contains("deltas:") || line.contains("files:") {
             let sanitized = line.trim().to_owned();
             let mut n = 0usize;
             if let Some(precentage) = find_percentage(&sanitized) {
