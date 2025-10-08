@@ -65,6 +65,7 @@ jobs:
           linux: |
             git clone https://github.com/git/git.git --branch v2.49.1 --depth 1
             cd git
+            echo NO_GETTEXT=1 > config.mak
             cat > conanfile.txt <<CONANFILE
             [requires]
             openssl/3.4.1
@@ -95,10 +96,14 @@ jobs:
             brew install autoconf
             git clone https://github.com/git/git.git --branch v2.49.1 --depth 1
             cd git
+            echo NO_GETTEXT=1 > config.mak
             make configure
             ./configure --with-openssl --with-curl --with-expat --without-tcltk --prefix=/
             make -j$(sysctl -n hw.logicalcpu) RUNTIME_PREFIX=1 install DESTDIR=$PWD/dist
           windows: |
+            curl -L -O https://github.com/brechtsanders/pedeps/releases/download/0.1.15/pedeps-0.1.15-win64.zip
+            mkdir -p pedeps
+            unzip pedeps-0.1.15-win64.zip -d pedeps/
             curl -L -O https://github.com/git-for-windows/git/releases/download/v2.51.0.windows.2/MinGit-2.51.0.2-busybox-64-bit.zip
             mkdir git
             cd git
@@ -133,7 +138,9 @@ jobs:
 
             mkdir -p toolkit/bin
             cp ../platform-tools/adb toolkit/bin/
-            cp -r ../git/dist/* toolkit/
+            mkdir -p toolkit/libexec/git-core
+            cp -a ../git/dist/libexec/git-core/{git,git-remote-http,git-remote-https} toolkit/libexec/git-core/
+            ln toolkit/libexec/git-core/git toolkit/bin/
             cp -r $PYTHON_PREFIX/* toolkit/
             mkdir -p config
             cp ../deploy.unix.yaml config/deploy.yaml
@@ -170,7 +177,9 @@ jobs:
 
             mkdir -p toolkit/bin
             cp ../platform-tools/adb toolkit/bin/
-            cp -r ../git/dist/* toolkit/
+            mkdir -p toolkit/libexec/git-core
+            cp -a ../git/dist/libexec/git-core/{git,git-remote-http,git-remote-https} toolkit/libexec/git-core/
+            ln toolkit/libexec/git-core/git toolkit/bin/
             cp -r $PYTHON_PREFIX/* toolkit/
             mkdir -p config
             cp ../deploy.unix.yaml config/deploy.yaml
@@ -202,7 +211,11 @@ jobs:
 
             mkdir -ea 0 toolkit
             cp ..\platform-tools\adb.exe, ..\platform-tools\Adb*.dll toolkit\
-            cp -r ..\git toolkit\
+            mkdir -ea 0 toolkit\git\cmd
+            cp ..\git\cmd\git.exe toolkit\git\cmd\
+            mkdir -ea 0 toolkit\git\mingw64\bin
+            $git_files = @("git.exe","git-remote-http.exe","git-remote-https.exe","libcurl-4.dll") | ForEach-Object { "..\git\mingw64\bin\" + $_ }
+            ..\pedeps\bin\copypedeps.exe -r $git_files toolkit\git\mingw64\bin\
             cp -r ($env:PYTHON_PREFIX + "\*") toolkit\
             mkdir -ea 0 config
             cp ..\deploy.windows.yaml config\deploy.yaml
