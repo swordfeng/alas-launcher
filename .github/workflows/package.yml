@@ -59,6 +59,13 @@ jobs:
           UV_PYTHON= uvx change_wheel_version mxnet-1.9.1-cp38-cp38-${{ matrix.python-platform }}.whl --version 1.6.99
           uv pip install --prefix "$PYTHON_PREFIX" --no-deps mxnet-1.6.99-cp38-cp38-${{ matrix.python-platform }}.whl
           uv pip install --prefix "$PYTHON_PREFIX" -r requirements.in
+      - name: Shrink python site-packages
+        shell: bash
+        run: |
+          SP=$(find $PYTHON_PREFIX -name site-packages -type d)
+          rm -rf $SP/Crypto/SelfTest
+          find $SP/ -name tests -type d | xargs rm -rf
+          find $SP/ -name '*.pyi' -type f -delete
       - name: Get git
         uses: knicknic/os-specific-run@v1.0.3
         with:
@@ -181,6 +188,7 @@ jobs:
             cp -a ../git/dist/libexec/git-core/{git,git-remote-http,git-remote-https} toolkit/libexec/git-core/
             ln toolkit/libexec/git-core/git toolkit/bin/
             cp -r $PYTHON_PREFIX/* toolkit/
+            find toolkit/ -type f -name '*.so*' -or -type f -executable -exec strip --strip-unneeded {} \;
             mkdir -p config
             cp ../deploy.unix.yaml config/deploy.yaml
             cp ../target/release/alas-launcher alas-launcher
