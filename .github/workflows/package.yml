@@ -154,15 +154,15 @@ jobs:
             cp Info.plist AzurLaneAutoScript.app/Contents/
             rdfind -minsize 128 -makehardlinks true AzurLaneAutoScript.app
             uv run python - <<EOF
-            import tarfile
-            with tarfile.open('AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz', 'x:xz', preset=4) as t:
+            import tarfile, lzma
+            with tarfile.open('AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz', 'x:xz', preset=9|lzma.PRESET_EXTREME) as t:
               t.add('AzurLaneAutoScript.app')
             EOF
 
             cp deploy.unix-cn.yaml AzurLaneAutoScript.app/Contents/AzurLaneAutoScript/config/deploy.yaml
             uv run python - <<EOF
-            import tarfile
-            with tarfile.open('AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz', 'x:xz', preset=4) as t:
+            import tarfile, lzma
+            with tarfile.open('AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz', 'x:xz', preset=9|lzma.PRESET_EXTREME) as t:
               t.add('AzurLaneAutoScript.app')
             EOF
           linux: |
@@ -188,15 +188,15 @@ jobs:
             cd ${{ github.workspace }}
             rdfind -minsize 128 -makehardlinks true AzurLaneAutoScript
             uv run python - <<EOF
-            import tarfile
-            with tarfile.open('AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz', 'x:xz', preset=4) as t:
+            import tarfile, lzma
+            with tarfile.open('AzurLaneAutoScript-${{ runner.os }}-$(uname -m).tar.xz', 'x:xz', preset=9|lzma.PRESET_EXTREME) as t:
               t.add('AzurLaneAutoScript')
             EOF
 
             cp deploy.unix-cn.yaml AzurLaneAutoScript/config/deploy.yaml
             uv run python - <<EOF
-            import tarfile
-            with tarfile.open('AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz', 'x:xz', preset=4) as t:
+            import tarfile, lzma
+            with tarfile.open('AzurLaneAutoScript-CN-${{ runner.os }}-$(uname -m).tar.xz', 'x:xz', preset=9|lzma.PRESET_EXTREME) as t:
               t.add('AzurLaneAutoScript')
             EOF
           windows: |
@@ -223,15 +223,15 @@ jobs:
 
             cd ${{ github.workspace }}
             uv run python -c @"
-            import tarfile
-            with tarfile.open('AzurLaneAutoScript-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.xz', 'x:xz', preset=4) as t:
+            import tarfile, lzma
+            with tarfile.open('AzurLaneAutoScript-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.xz', 'x:xz', preset=9|lzma.PRESET_EXTREME) as t:
               t.add('AzurLaneAutoScript')
             "@
 
             cp deploy.windows-cn.yaml AzurLaneAutoScript\config\deploy.yaml
             uv run python -c @"
-            import tarfile
-            with tarfile.open('AzurLaneAutoScript-CN-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.xz', 'x:xz', preset=4) as t:
+            import tarfile, lzma
+            with tarfile.open('AzurLaneAutoScript-CN-${{ runner.os }}-$($env:PROCESSOR_ARCHITECTURE.ToLower()).tar.xz', 'x:xz', preset=9|lzma.PRESET_EXTREME) as t:
               t.add('AzurLaneAutoScript')
             "@
       - name: Upload artifacts
