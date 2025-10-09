@@ -76,6 +76,11 @@ fn main() -> Result<()> {
         .run(move |app_handle, event| {
             match event {
                 tauri::RunEvent::Ready => {
+                    let handle1 = app_handle.clone();
+                    ctrlc::set_handler(move || {
+                        info!("Received Ctrl-C, shutting down...");
+                        handle1.exit(0);
+                    }).expect("Error setting Ctrl-C handler");
                     let app_handle = app_handle.clone();
                     let backend = backend.clone();
                     thread::spawn(move || {
