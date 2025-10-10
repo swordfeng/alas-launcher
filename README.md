@@ -13,7 +13,7 @@ ALAS Launcher: 一种新型的 [AzurLaneAutoScript](https://github.com/LmeSzinc/
 简单易懂的使用方法
 ---
 去右边 Releases 里，下载你对应系统和 CPU 的压缩包，解压。
-- Windows: 打开 `alas-launcher.exe`
+- Windows: 打开 `alas-launcher.exe`。如果使用 Windows 7, 8 或 10，请确保已经安装 [WebView2](https://developer.microsoft.com/zh-cn/microsoft-edge/webview2)
 - MacOS: 打开 `AzurLaneAutoScript.app`。如果报错则需要先打开终端，运行 `xattr -dr com.apple.quarantine AzurLaneAutoScript.app` （因为我没有林檎开发者给程序签名）
 - Linux: 打开 `alas-launcher`。注意程序依赖 `libwebkit2gtk-4.1` 和较新的 `glibc` （用 Ubuntu 22.04 跑的 CI）。如果没有，可能这启动器没法跑，但是 ALAS 本体跑起来应该没问题的
 

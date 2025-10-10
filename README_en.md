@@ -12,7 +12,7 @@ Thus this repo was born.
 Simple Usage Instructions
 ---
 Go to Releases on the right, download the archive for your system and CPU architecture, and extract it.
-- Windows: Run `alas-launcher.exe`
+- Windows: Run `alas-launcher.exe`. If using Windows 7, 8, or 10, please make sure [WebView2](https://developer.microsoft.com/en-us/Microsoft-edge/webview2) is installed
 - MacOS: Open `AzurLaneAutoScript.app`. If there's an error, open Terminal and run `xattr -dr com.apple.quarantine AzurLaneAutoScript.app` (because I don't have an Apple developer certificate to sign the program)
 - Linux: Run `alas-launcher`. Note that the program depends on `libwebkit2gtk-4.1` and a recent `glibc` (CI runs on Ubuntu 22.04). If you don't have these, the launcher might not work, but ALAS itself should run fine
 
