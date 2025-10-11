@@ -149,6 +149,7 @@ jobs:
             cp -a ../git/dist/libexec/git-core/{git,git-remote-http,git-remote-https} toolkit/libexec/git-core/
             ln toolkit/libexec/git-core/git toolkit/bin/
             cp -r $PYTHON_PREFIX/* toolkit/
+            uv run python ../clean_pyc.py toolkit/
             mkdir -p config
             cp ../deploy.unix.yaml config/deploy.yaml
 
@@ -188,6 +189,7 @@ jobs:
             cp -a ../git/dist/libexec/git-core/{git,git-remote-http,git-remote-https} toolkit/libexec/git-core/
             ln toolkit/libexec/git-core/git toolkit/bin/
             cp -r $PYTHON_PREFIX/* toolkit/
+            uv run python ../clean_pyc.py toolkit/
             find toolkit/ -type f -name '*.so*' -or -type f -executable -exec strip --strip-unneeded {} \;
             mkdir -p config
             cp ../deploy.unix.yaml config/deploy.yaml
@@ -225,6 +227,7 @@ jobs:
             $git_files = @("git.exe","git-remote-http.exe","git-remote-https.exe","libcurl-4.dll") | ForEach-Object { "..\git\mingw64\bin\" + $_ }
             ..\pedeps\bin\copypedeps.exe -r $git_files toolkit\git\mingw64\bin\
             cp -r ($env:PYTHON_PREFIX + "\*") toolkit\
+            uv run python ..\clean_pyc.py toolkit\
             mkdir -ea 0 config
             cp ..\deploy.windows.yaml config\deploy.yaml
             cp ..\target\release\alas-launcher.exe alas-launcher.exe
